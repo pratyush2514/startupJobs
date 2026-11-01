@@ -90,6 +90,12 @@ KULA_BOARDS = {
 # Swiggy serves a public jobs JSON (see fetch_swiggy).
 SWIGGY_IDS = ["bengaluru-swiggy"]
 
+# TurboHire tenants: (subdomain, org GUID) -> our company ids.
+# GUID comes from the tenant's /careerpage/{guid} URL.
+TURBOHIRE_TENANTS = {
+    ("flipkart", "4d757ba0-3d57-448a-b82c-238ed87ac90f"): ["bengaluru-flipkart"],
+}
+
 # Keka: (subdomain, portal identifier) -> our company ids.
 # The identifier comes from the careers page's embed script URL:
 #   {sub}.keka.com/careers -> /careers/api/embedjobs/js/{identifier}
@@ -128,6 +134,78 @@ def fetch_lever(slug):
 _KULA_BS = chr(92)  # backslash — avoids literal-escaping ambiguity
 
 
+
+
+def fetch_turbohire(subdomain, org_guid):
+    """TurboHire ATS public API — no key, but needs a fresh anon token.
+
+    Discovered 2026-11-01 (Flipkart). Flow:
+      1. GET thapi.azurewebsites.net/api/token/noauth (Origin+Referer headers)
+      2. POST thapi-external.azurewebsites.net/api/careerpagev2/filteredjobs
+         ?orgId={guid}&pageType=2  (pageType=2 = genuinely open roles)
+    Uses curl via subprocess: the endpoint intermittently truncates
+    responses over urllib, curl is reliable. Returns the Result job list.
+    """
+    import subprocess
+
+    base = f"https://{subdomain}.turbohire.co"
+    career_ref = f"{base}/careerpage/{org_guid}"
+    common = [
+        "curl", "-s", "--max-time", "25", "-A", "startup-arena/1.0",
+        "-H", f"Origin: {base}", "-H", f"Referer: {career_ref}",
+    ]
+    tok = subprocess.run(
+        common + ["https://thapi.azurewebsites.net/api/token/noauth"],
+        capture_output=True, text=True, timeout=30,
+    )
+    token = json.loads(tok.stdout).get("access_token")
+    if not token:
+        raise RuntimeError("turbohire: no access_token")
+    jobs = subprocess.run(
+        common + [
+            "-X", "POST",
+            "-H", f"Authorization: Bearer {token}",
+            "-H", "Content-Type: application/json",
+            "-d", "{}",
+            f"https://thapi-external.azurewebsites.net/api/careerpagev2/filteredjobs"
+            f"?orgId={org_guid}&pageType=2",
+        ],
+        capture_output=True, text=True, timeout=40,
+    )
+    data = json.loads(jobs.stdout)
+    result = data.get("Result")
+    return result if isinstance(result, list) else []
+
+
+def turbohire_role(job, subdomain, cid):
+    loc_raw = job.get("Location") or ""
+    try:
+        locs = json.loads(loc_raw) if isinstance(loc_raw, str) else loc_raw
+    except (json.JSONDecodeError, ValueError):
+        locs = []
+    addr = ""
+    if isinstance(locs, list) and locs:
+        addr = (locs[0] or {}).get("Address", "")
+    if "India" not in addr:
+        return None
+    obf = job.get("JobIdObfuscated") or ""
+    exp = job.get("Experience") or {}
+    level = None
+    if isinstance(exp, dict) and (exp.get("MinExp") is not None or exp.get("MaxExp") is not None):
+        level = f"{exp.get('MinExp', '?')}-{exp.get('MaxExp', '?')} yrs"
+    pub = job.get("PublishedDate") or ""
+    return {
+        "id": f"turbohire-{cid}-{job.get('JobId')}",
+        "companyId": cid,
+        "title": clean(job.get("JobTitle")),
+        "team": clean(job.get("Department")),
+        "level": level,
+        "location": clean(addr),
+        "city": infer_city(addr, cid.split("-")[0]),
+        "workMode": None,
+        "postedAt": pub[:10] if isinstance(pub, str) else None,
+        "applyUrl": f"https://{subdomain}.turbohire.co/job/publicjobs/{obf}" if obf else None,
+    }
 
 def fetch_swiggy():
     """Swiggy's public jobs JSON — no key needed.
@@ -580,6 +658,7 @@ def run_rapidapi(api_key, roles, per_company, only=None):
     covered_ids |= {cid for ids in KEKA_PORTALS.values() for cid in ids}
     covered_ids |= {cid for ids in KULA_BOARDS.values() for cid in ids}
     covered_ids |= set(SWIGGY_IDS)
+    covered_ids |= {cid for ids in TURBOHIRE_TENANTS.values() for cid in ids}
     by_name = {}
     for cid, name in companies:
         if cid in covered_ids:
@@ -762,6 +841,18 @@ def main():
             if role and role["title"] and role["applyUrl"]:
                 roles.append(role)
                 per_company[cid] = per_company.get(cid, 0) + 1
+    for (subdomain, org_guid), company_ids in TURBOHIRE_TENANTS.items():
+        try:
+            jobs = fetch_turbohire(subdomain, org_guid)
+        except Exception as e:
+            print(f"WARN turbohire {subdomain}: {e}")
+            continue
+        for job in jobs:
+            for cid in company_ids:
+                role = turbohire_role(job, subdomain, cid)
+                if role and role["title"] and role["applyUrl"]:
+                    roles.append(role)
+                    per_company[cid] = per_company.get(cid, 0) + 1
     api_key = os.environ.get("RAPIDAPI_KEY")
     if api_key:
         only = None
