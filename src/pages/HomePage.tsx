@@ -98,9 +98,8 @@ export default function HomePage({
         </div>
 
         <p className="atlas-foot">
-          <span>
-            <Pin size={12} /> Office locations are approximate
-          </span>
+          <Pin size={12} /> Office locations are approximate
+          <span className="dot" aria-hidden="true">·</span>
           <span>Curated sample directory</span>
         </p>
       </section>
