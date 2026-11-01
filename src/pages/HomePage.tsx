@@ -5,12 +5,12 @@ import { MapCanvas } from "../components/MapCanvas"
 import { CitySection } from "../components/CitySection"
 import { HowItWorks } from "../components/HowItWorks"
 import { Pricing } from "../components/Pricing"
+import { LazySection } from "../components/LazySection"
 import {
   ArrowRight,
   ArrowUpRight,
   Check,
   Compass,
-  Globe,
   Pin,
 } from "../components/icons"
 import { useReveal } from "../lib/hooks"
@@ -47,38 +47,38 @@ export default function HomePage({
   return (
     <div className="home-page">
       <section className="hero container">
-        <p className="hero-kicker">
-          <Pin size={14} />
+        <p className="hero-kicker" data-reveal>
+          <Pin size={13} />
           {plural(companies.length, "startup", "startups")} across{" "}
           {plural(cities.length, "city", "cities")}
         </p>
-        <h1>
+        <h1 data-reveal>
           Explore India’s startups,
           <br />
           <span>on one map.</span>
         </h1>
-        <p className="hero-lede">
+        <p className="hero-lede" data-reveal>
           Find a team by neighbourhood, then go straight to its own careers
           page. Every pin is a real company; every role lives on its own site.
         </p>
-        <div className="hero-actions">
+        <div className="hero-actions" data-reveal>
           <a href="#/map" className="button button-primary">
-            Open the map <ArrowUpRight size={16} />
+            Open the map <ArrowUpRight size={15} />
           </a>
           <a href="#/companies" className="button button-secondary">
             Browse companies
           </a>
         </div>
-        <p className="hero-note">
+        <p className="hero-note" data-reveal>
           <Check size={13} /> Free to explore. No account or card needed.
         </p>
       </section>
 
-      <section className="atlas container" aria-label="Map preview">
+      <section className="atlas container" aria-label="Map preview" data-reveal>
         <div className="atlas-head">
           <div className="atlas-title">
             <span className="atlas-mark" aria-hidden="true">
-              <Compass size={16} />
+              <Compass size={15} />
             </span>
             <span>
               <strong>The startup atlas</strong>
@@ -88,9 +88,6 @@ export default function HomePage({
               </small>
             </span>
           </div>
-          <a href={`#/map?city=${city.id}`} className="text-link">
-            Open the full map <ArrowUpRight size={15} />
-          </a>
         </div>
 
         <div className="city-switcher" role="group" aria-label="Choose a city">
@@ -108,6 +105,13 @@ export default function HomePage({
         </div>
 
         <div className="preview-map">
+          <a
+            href={`#/map?city=${city.id}`}
+            className="map-open-pill"
+            aria-label={`Open the full map of ${city.name}`}
+          >
+            Open the full map <ArrowUpRight size={13} />
+          </a>
           <MapCanvas
             city={city}
             companies={cityCompanies}
@@ -117,15 +121,15 @@ export default function HomePage({
           />
         </div>
 
-        <div className="atlas-foot">
+        <p className="atlas-foot">
           <span>
-            <Pin size={13} /> Office locations are approximate
+            <Pin size={12} /> Office locations are approximate
           </span>
           <span>Curated sample directory</span>
-        </div>
+        </p>
       </section>
 
-      <section className="stats container" aria-label="At a glance">
+      <section className="stats container" aria-label="At a glance" data-reveal>
         <div className="stat">
           <strong>{companies.length}</strong>
           <span>companies to discover</span>
@@ -138,66 +142,68 @@ export default function HomePage({
           <strong>{neighbourhoods}</strong>
           <span>neighbourhoods mapped</span>
         </div>
-        <div className="stat-note">
-          <Globe size={26} />
-          <p>
-            Built for your ambition.
-            <strong>Wherever it takes you.</strong>
-          </p>
-        </div>
       </section>
 
-      <CitySection />
-      <HowItWorks />
+      <LazySection label="Loading cities" minHeight={420}>
+        <CitySection />
+      </LazySection>
 
-      <section className="section companies-feature container">
-        <div className="section-heading" data-reveal>
-          <div>
-            <p className="kicker">Great teams, real possibilities</p>
-            <h2>Your next team could be here.</h2>
-            <p className="section-sub">
-              A first look at the teams building in {city.name}.
-            </p>
-          </div>
-          <a
-            href={`#/companies?city=${city.id}`}
-            className="text-link"
-          >
-            All {plural(cityCompanies.length, "company", "companies")}{" "}
-            <ArrowRight size={15} />
-          </a>
-        </div>
-        <div className="company-grid" key={city.id}>
-          {featured.map((company) => (
-            <button
-              key={company.id}
-              type="button"
-              className="company-row"
-              onClick={() => onSelect(company)}
-              data-reveal
+      <LazySection label="Loading how it works" minHeight={380}>
+        <HowItWorks />
+      </LazySection>
+
+      <LazySection label="Loading companies" minHeight={420}>
+        <section className="section companies-feature container">
+          <div className="section-heading" data-reveal>
+            <div>
+              <p className="kicker">Great teams, real possibilities</p>
+              <h2>Your next team could be here.</h2>
+              <p className="section-sub">
+                A first look at the teams building in {city.name}.
+              </p>
+            </div>
+            <a
+              href={`#/companies?city=${city.id}`}
+              className="text-link"
             >
-              <CompanyLogo company={company} />
-              <span className="company-row-copy">
-                <strong>{company.name}</strong>
-                <small>
-                  {company.category}, {city.name}
-                </small>
-              </span>
-              <ArrowUpRight size={16} className="company-row-arrow" />
-            </button>
-          ))}
-        </div>
-        <p className="section-footnote">
-          A curated showcase. Visit each company’s careers page for the latest
-          openings.
-        </p>
-      </section>
+              All {plural(cityCompanies.length, "company", "companies")}{" "}
+              <ArrowRight size={14} />
+            </a>
+          </div>
+          <div className="company-grid" key={city.id}>
+            {featured.map((company) => (
+              <button
+                key={company.id}
+                type="button"
+                className="company-row"
+                onClick={() => onSelect(company)}
+                data-reveal
+              >
+                <CompanyLogo company={company} />
+                <span className="company-row-copy">
+                  <strong>{company.name}</strong>
+                  <small>
+                    {company.category}, {city.name}
+                  </small>
+                </span>
+                <ArrowUpRight size={15} className="company-row-arrow" />
+              </button>
+            ))}
+          </div>
+          <p className="section-footnote">
+            A curated showcase. Visit each company’s careers page for the latest
+            openings.
+          </p>
+        </section>
+      </LazySection>
 
-      <Pricing />
+      <LazySection label="Loading pricing" minHeight={380}>
+        <Pricing />
+      </LazySection>
 
-      <section className="bottom-cta container">
+      <section className="bottom-cta container" data-reveal>
         <span className="cta-mark" aria-hidden="true">
-          <Compass size={26} />
+          <Compass size={22} />
         </span>
         <div className="bottom-cta-copy">
           <p className="kicker">Your next chapter starts somewhere</p>
@@ -205,7 +211,7 @@ export default function HomePage({
           <p>A new team, a new city, or something closer to home.</p>
         </div>
         <a href="#/map" className="button button-primary">
-          Take a look around <ArrowUpRight size={16} />
+          Take a look around <ArrowUpRight size={15} />
         </a>
       </section>
     </div>

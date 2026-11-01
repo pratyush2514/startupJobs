@@ -93,6 +93,8 @@ export function useOnline() {
 type Connection = {
   saveData?: boolean
   effectiveType?: string
+  addEventListener?: (type: string, listener: () => void) => void
+  removeEventListener?: (type: string, listener: () => void) => void
 }
 
 export function useSlowConnection() {
@@ -113,7 +115,7 @@ export function useSlowConnection() {
     if (!connection?.addEventListener) return
     const update = () => setSlow(read())
     connection.addEventListener("change", update)
-    return () => connection.removeEventListener("change", update)
+    return () => connection.removeEventListener?.("change", update)
   }, [])
 
   return slow
