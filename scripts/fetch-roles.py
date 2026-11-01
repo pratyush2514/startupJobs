@@ -87,6 +87,9 @@ KULA_BOARDS = {
     "rocketlane": ["chennai-rocketlane"],
 }
 
+# Swiggy serves a public jobs JSON (see fetch_swiggy).
+SWIGGY_IDS = ["bengaluru-swiggy"]
+
 # Keka: (subdomain, portal identifier) -> our company ids.
 # The identifier comes from the careers page's embed script URL:
 #   {sub}.keka.com/careers -> /careers/api/embedjobs/js/{identifier}
@@ -124,6 +127,55 @@ def fetch_lever(slug):
 
 _KULA_BS = chr(92)  # backslash — avoids literal-escaping ambiguity
 
+
+
+def fetch_swiggy():
+    """Swiggy's public jobs JSON — no key needed.
+
+    Discovered 2026-11-01: careers.swiggy.in is a Vite SPA whose bundle
+    fetches /api/jobs.json. Fields are minified:
+      t=title, c=city, l=location, b=business unit (team),
+      e=employment type, r=remote flag, h=hybrid flag,
+      d=posted date (epoch ms), u=apply URL (SmartRecruiters SWIGGY board).
+    """
+    url = "https://careers.swiggy.in/api/jobs.json"
+    req = urllib.request.Request(url, headers={"User-Agent": "startup-arena/1.0"})
+    with urllib.request.urlopen(req, timeout=25) as res:
+        data = json.load(res)
+    jobs = data.get("jobs") if isinstance(data, dict) else data
+    return jobs if isinstance(jobs, list) else []
+
+
+def swiggy_role(job, cid):
+    loc = job.get("l") or ""
+    if not looks_india(loc):
+        return None
+    wm = None
+    if job.get("r") == 1:
+        wm = "remote"
+    elif job.get("h") == 1:
+        wm = "hybrid"
+    else:
+        wm = "onsite"
+    posted = job.get("d")
+    posted_at = None
+    if isinstance(posted, (int, float)) and posted > 0:
+        try:
+            posted_at = datetime.fromtimestamp(posted / 1000, tz=timezone.utc).date().isoformat()
+        except (OSError, OverflowError, ValueError):
+            posted_at = None
+    return {
+        "id": f"swiggy-{cid}-{abs(hash(job.get('u') or job.get('t'))) % 10**8}",
+        "companyId": cid,
+        "title": clean(job.get("t")),
+        "team": clean(job.get("b")),
+        "level": None,
+        "location": clean(loc),
+        "city": infer_city(loc, cid.split("-")[0]),
+        "workMode": wm,
+        "postedAt": posted_at,
+        "applyUrl": job.get("u"),
+    }
 
 def _kula_unescape(s):
     """Decode Kula flight payload (escaped quotes / unicode)."""
@@ -527,6 +579,7 @@ def run_rapidapi(api_key, roles, per_company, only=None):
     covered_ids |= {cid for ids in ASHBY_BOARDS.values() for cid in ids}
     covered_ids |= {cid for ids in KEKA_PORTALS.values() for cid in ids}
     covered_ids |= {cid for ids in KULA_BOARDS.values() for cid in ids}
+    covered_ids |= set(SWIGGY_IDS)
     by_name = {}
     for cid, name in companies:
         if cid in covered_ids:
@@ -698,6 +751,17 @@ def main():
                 if role:
                     roles.append(role)
                     per_company[cid] = per_company.get(cid, 0) + 1
+    for cid in SWIGGY_IDS:
+        try:
+            jobs = fetch_swiggy()
+        except Exception as e:
+            print(f"WARN swiggy: {e}")
+            break
+        for job in jobs:
+            role = swiggy_role(job, cid)
+            if role and role["title"] and role["applyUrl"]:
+                roles.append(role)
+                per_company[cid] = per_company.get(cid, 0) + 1
     api_key = os.environ.get("RAPIDAPI_KEY")
     if api_key:
         only = None
