@@ -1,0 +1,10 @@
+{
+  "description": "Explore India’s startup ecosystem with interactive city maps, helping founders, investors, and businesses discover startup hubs across major cities.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}

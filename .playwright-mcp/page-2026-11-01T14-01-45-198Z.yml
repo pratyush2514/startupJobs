@@ -1,0 +1,258 @@
+- generic [ref=e3]:
+  - generic [ref=e4]:
+    - generic [ref=e5]: A bigger map. A world of possibilities.
+    - generic [ref=e6]: "|"
+    - link "Now exploring 8 cities across India" [ref=e7] [cursor=pointer]:
+      - /url: "#/cities"
+  - banner [ref=e10]:
+    - generic [ref=e11]:
+      - link "Startup Arena home" [ref=e12] [cursor=pointer]:
+        - /url: "#/"
+        - generic [ref=e18]:
+          - text: startuparena
+          - generic [ref=e19]: INDIA
+      - navigation "Main navigation" [ref=e20]:
+        - link "Explore cities" [ref=e21] [cursor=pointer]:
+          - /url: "#/cities"
+        - link "Pricing" [ref=e22] [cursor=pointer]:
+          - /url: "#/pricing"
+      - generic [ref=e23]:
+        - button "Switch to light theme" [ref=e24] [cursor=pointer]
+        - link "Open the map" [ref=e31] [cursor=pointer]:
+          - /url: "#/map?city=bengaluru"
+  - main [ref=e32]:
+    - generic [ref=e33]:
+      - heading "Explore India’s startups, on one map" [level=1] [ref=e34]: Explore India’s startups,on one map
+      - paragraph [ref=e35]: 54 companies across 8 cities, each pinned to a neighbourhood. Find a team near you, then explore openings on the company’s own job board.
+      - generic [ref=e36]:
+        - link "Explore cities" [ref=e37] [cursor=pointer]:
+          - /url: "#/cities"
+        - link "Open the map" [ref=e38] [cursor=pointer]:
+          - /url: "#/map?city=bengaluru"
+    - generic [ref=e40]:
+      - generic [ref=e41]:
+        - generic "Interactive company map of Bengaluru" [ref=e42]:
+          - generic:
+            - generic:
+              - button "R" [ref=e43] [cursor=pointer]
+              - button "Sw" [ref=e46] [cursor=pointer]
+              - button "Ph" [ref=e49] [cursor=pointer]
+              - button "Ze" [ref=e52] [cursor=pointer]
+              - button "Me" [ref=e55] [cursor=pointer]
+              - button "Gr" [ref=e58] [cursor=pointer]
+              - button "CR" [ref=e61] [cursor=pointer]
+              - button "Ze" [ref=e64] [cursor=pointer]
+              - button "In" [ref=e67] [cursor=pointer]
+              - button "Fr" [ref=e70] [cursor=pointer]
+              - button "Fl" [ref=e73] [cursor=pointer]
+              - button "Po" [ref=e76] [cursor=pointer]
+          - generic:
+            - generic:
+              - generic [ref=e79]:
+                - button "Zoom in" [ref=e80] [cursor=pointer]: +
+                - button "Zoom out" [ref=e81] [cursor=pointer]: −
+              - generic [ref=e82]:
+                - link "Leaflet" [ref=e83] [cursor=pointer]:
+                  - /url: https://leafletjs.com
+                - text: "| Tiles © Esri, HERE, Garmin, OpenStreetMap contributors"
+        - button "Recenter map" [ref=e88] [cursor=pointer]
+      - link "Open the full map" [ref=e92] [cursor=pointer]:
+        - /url: "#/map?city=bengaluru"
+      - combobox "Select city" [ref=e100] [cursor=pointer]:
+        - option "Bengaluru" [selected]
+        - option "Delhi NCR"
+        - option "Mumbai"
+        - option "Hyderabad"
+        - option "Pune"
+        - option "Chennai"
+        - option "Ahmedabad"
+        - option "Kolkata"
+    - paragraph [ref=e103]: Curated sample directory · Approximate office locations · Official career links
+    - generic [ref=e104]:
+      - generic [ref=e105]:
+        - strong [ref=e106]: 54+
+        - generic [ref=e107]: companies to discover
+      - generic [ref=e108]:
+        - strong [ref=e109]: "8"
+        - generic [ref=e110]: cities. countless possibilities.
+      - generic [ref=e111]:
+        - strong [ref=e112]: "1"
+        - generic [ref=e113]: map to bring it all together
+      - paragraph [ref=e120]:
+        - text: Built for your ambition.
+        - strong [ref=e121]: Wherever it takes you.
+    - generic [ref=e122]:
+      - generic [ref=e123]:
+        - generic [ref=e124]:
+          - generic [ref=e125]: BIG DREAMS. MANY PIN CODES.
+          - heading "Where do you want to go?" [level=2] [ref=e126]
+          - paragraph [ref=e127]: Same ambition. A different backdrop. Find your city.
+        - link "Explore all cities" [ref=e128] [cursor=pointer]:
+          - /url: "#/cities"
+      - generic [ref=e131]:
+        - link "BLR STARTUP CAPITAL Bengaluru India’s startup capital 12 companies to explore" [ref=e132] [cursor=pointer]:
+          - /url: "#/map?city=bengaluru"
+          - generic [ref=e133]:
+            - generic [ref=e134]: BLR
+            - generic [ref=e135]: STARTUP CAPITAL
+          - heading "Bengaluru" [level=3] [ref=e144]
+          - paragraph [ref=e145]: India’s startup capital
+          - generic [ref=e146]: 12 companies to explore
+        - link "DEL Delhi NCR Big ideas. Bigger possibilities. 6 companies to explore" [ref=e150] [cursor=pointer]:
+          - /url: "#/map?city=delhi"
+          - generic [ref=e151]: DEL
+          - heading "Delhi NCR" [level=3] [ref=e160]
+          - paragraph [ref=e161]: Big ideas. Bigger possibilities.
+          - generic [ref=e162]: 6 companies to explore
+        - link "BOM Mumbai Where ambition finds its home 6 companies to explore" [ref=e166] [cursor=pointer]:
+          - /url: "#/map?city=mumbai"
+          - generic [ref=e167]: BOM
+          - heading "Mumbai" [level=3] [ref=e176]
+          - paragraph [ref=e177]: Where ambition finds its home
+          - generic [ref=e178]: 6 companies to explore
+        - link "HYD Hyderabad The next big thing is here 6 companies to explore" [ref=e182] [cursor=pointer]:
+          - /url: "#/map?city=hyderabad"
+          - generic [ref=e183]: HYD
+          - heading "Hyderabad" [level=3] [ref=e192]
+          - paragraph [ref=e193]: The next big thing is here
+          - generic [ref=e194]: 6 companies to explore
+    - generic [ref=e198]:
+      - generic [ref=e199]:
+        - generic [ref=e200]:
+          - generic [ref=e201]: LESS SCROLLING. MORE DISCOVERING.
+          - heading "A fresh way to find what’s next." [level=2] [ref=e202]
+        - generic [ref=e203]: Three small steps. One big move.
+      - generic [ref=e204]:
+        - article [ref=e205]:
+          - generic [ref=e206]: Your next opportunity
+          - generic [ref=e233]:
+            - generic [ref=e234]: "01"
+            - heading "Put possibility on the map." [level=3] [ref=e235]
+            - paragraph [ref=e236]: Pick a city. Explore a neighbourhood. Discover the companies you didn’t know were right there.
+        - article [ref=e237]:
+          - generic [ref=e238]:
+            - generic [ref=e250]:
+              - generic [ref=e251]: Engineering
+              - generic [ref=e252]: Design
+            - generic [ref=e253]: Your kind of team
+          - generic [ref=e256]:
+            - generic [ref=e257]: "02"
+            - heading "Find a team that feels right." [level=3] [ref=e258]
+            - paragraph [ref=e259]: Look beyond a job title. Get to know the companies, their industries, and where they’re building.
+        - article [ref=e260]:
+          - generic [ref=e261]:
+            - generic [ref=e269]:
+              - strong [ref=e270]: Your next big move
+              - generic [ref=e271]: A new chapter awaits
+            - generic [ref=e275]: Make your move
+            - generic [ref=e279]: +
+            - generic [ref=e280]: +
+          - generic [ref=e281]:
+            - generic [ref=e282]: "03"
+            - heading "Go straight to the source." [level=3] [ref=e283]
+            - paragraph [ref=e284]: Found your kind of place? Head to the company’s career page and take the next step. No middlemen.
+    - generic [ref=e285]:
+      - generic [ref=e286]:
+        - generic [ref=e287]:
+          - generic [ref=e288]: GREAT TEAMS. REAL POSSIBILITIES.
+          - heading "Your next team could be here." [level=2] [ref=e289]
+        - link "Explore all companies" [ref=e290] [cursor=pointer]:
+          - /url: "#/companies"
+      - generic [ref=e293]:
+        - button "Razorpay Fintech · Bengaluru" [ref=e294] [cursor=pointer]:
+          - generic [ref=e296]:
+            - strong [ref=e297]: Razorpay
+            - generic [ref=e298]: Fintech · Bengaluru
+        - button "Swiggy Consumer tech · Bengaluru" [ref=e302] [cursor=pointer]:
+          - generic [ref=e304]:
+            - strong [ref=e305]: Swiggy
+            - generic [ref=e306]: Consumer tech · Bengaluru
+        - button "PhonePe SaaS · Bengaluru" [ref=e310] [cursor=pointer]:
+          - generic [ref=e312]:
+            - strong [ref=e313]: PhonePe
+            - generic [ref=e314]: SaaS · Bengaluru
+        - button "Zerodha Technology · Bengaluru" [ref=e318] [cursor=pointer]:
+          - generic [ref=e320]:
+            - strong [ref=e321]: Zerodha
+            - generic [ref=e322]: Technology · Bengaluru
+        - button "Meesho Fintech · Bengaluru" [ref=e326] [cursor=pointer]:
+          - generic [ref=e328]:
+            - strong [ref=e329]: Meesho
+            - generic [ref=e330]: Fintech · Bengaluru
+        - button "Groww Consumer tech · Bengaluru" [ref=e334] [cursor=pointer]:
+          - generic [ref=e336]:
+            - strong [ref=e337]: Groww
+            - generic [ref=e338]: Consumer tech · Bengaluru
+        - button "CRED SaaS · Bengaluru" [ref=e342] [cursor=pointer]:
+          - generic [ref=e344]:
+            - strong [ref=e345]: CRED
+            - generic [ref=e346]: SaaS · Bengaluru
+        - button "Zepto Technology · Bengaluru" [ref=e350] [cursor=pointer]:
+          - generic [ref=e352]:
+            - strong [ref=e353]: Zepto
+            - generic [ref=e354]: Technology · Bengaluru
+        - button "InMobi Fintech · Bengaluru" [ref=e358] [cursor=pointer]:
+          - generic [ref=e360]:
+            - strong [ref=e361]: InMobi
+            - generic [ref=e362]: Fintech · Bengaluru
+      - paragraph [ref=e366]: A curated showcase. Visit company career pages for the latest openings.
+    - generic [ref=e367]:
+      - generic [ref=e368]:
+        - generic [ref=e369]:
+          - generic [ref=e370]: OPPORTUNITY SHOULD BE OPEN.
+          - heading "Start exploring. Stay curious." [level=2] [ref=e371]
+        - link "More about access" [ref=e372] [cursor=pointer]:
+          - /url: "#/pricing"
+      - generic [ref=e375]:
+        - article [ref=e376]:
+          - generic [ref=e377]:
+            - generic [ref=e378]: Explorer
+            - generic [ref=e379]: FREE, ALWAYS
+          - paragraph [ref=e380]: For a little curiosity. And your next big move.
+          - generic [ref=e381]: ₹0 no strings attached
+          - list [ref=e382]:
+            - listitem [ref=e383]: Every city, every company on the map
+            - listitem [ref=e386]: Company profiles and neighbourhood filters
+            - listitem [ref=e389]: Direct links to official careers pages
+            - listitem [ref=e392]: No account or card needed
+          - link "Start exploring" [ref=e395] [cursor=pointer]:
+            - /url: "#/map?city=bengaluru"
+        - article [ref=e399]:
+          - generic [ref=e400]: ON THE HORIZON
+          - heading "A little more direction. A lot more possibility." [level=3] [ref=e404]: A little more direction.A lot more possibility.
+          - paragraph [ref=e405]: Personalised matches, a place to track your journey, and tools that help you make your next move.
+          - generic [ref=e406]: We’re just getting started. These features aren’t available in this preview.
+          - link "Get to know Startup Arena" [ref=e407] [cursor=pointer]:
+            - /url: "#/faq"
+    - generic [ref=e410]:
+      - generic [ref=e414]:
+        - generic [ref=e415]: YOUR NEXT CHAPTER STARTS SOMEWHERE.
+        - heading "Let’s find your somewhere." [level=2] [ref=e416]
+        - paragraph [ref=e417]: A new team, a new city, or something closer to home.
+      - link "Take a look around" [ref=e418] [cursor=pointer]:
+        - /url: "#/map?city=bengaluru"
+  - contentinfo [ref=e422]:
+    - generic [ref=e423]:
+      - generic [ref=e424]:
+        - link "Startup Arena home" [ref=e425] [cursor=pointer]:
+          - /url: "#/"
+          - generic [ref=e431]:
+            - text: startuparena
+            - generic [ref=e432]: INDIA
+        - paragraph [ref=e433]: Find your place in what’s next.
+      - generic [ref=e434]:
+        - link "Map" [ref=e435] [cursor=pointer]:
+          - /url: "#/map?city=bengaluru"
+        - link "Cities" [ref=e436] [cursor=pointer]:
+          - /url: "#/cities"
+        - link "Companies" [ref=e437] [cursor=pointer]:
+          - /url: "#/companies"
+        - link "Career paths" [ref=e438] [cursor=pointer]:
+          - /url: "#/jobs"
+        - link "Pricing" [ref=e439] [cursor=pointer]:
+          - /url: "#/pricing"
+        - link "FAQ" [ref=e440] [cursor=pointer]:
+          - /url: "#/faq"
+    - generic [ref=e441]:
+      - generic [ref=e442]: Made for the next generation of India.
+      - generic [ref=e443]: Independent concept · Curated sample data · © 2026 Startup Arena

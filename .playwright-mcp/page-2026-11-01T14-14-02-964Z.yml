@@ -1,0 +1,146 @@
+- generic [ref=e3]:
+  - banner [ref=e10]:
+    - generic [ref=e11]:
+      - link "Startup Arena home" [ref=e12] [cursor=pointer]:
+        - /url: "#/"
+        - generic [ref=e18]:
+          - text: startuparena
+          - generic [ref=e19]: INDIA
+      - navigation "Main navigation" [ref=e20]:
+        - link "Explore cities" [ref=e21] [cursor=pointer]:
+          - /url: "#/cities"
+        - link "Companies" [ref=e543] [cursor=pointer]:
+          - /url: "#/companies"
+        - link "How it works" [ref=e544] [cursor=pointer]:
+          - /url: "#/about"
+        - link "Pricing" [ref=e22] [cursor=pointer]:
+          - /url: "#/pricing"
+      - button "Switch to light theme" [ref=e24] [cursor=pointer]
+  - main [ref=e446]:
+    - complementary [ref=e447]:
+      - generic [ref=e448]:
+        - generic [ref=e449]: FIND YOUR NEXT CHAPTER
+        - heading "Explore Bengaluru." [level=1] [ref=e450]
+        - paragraph [ref=e545]: A city full of possibilities. Start exploring.
+        - combobox "Select city" [ref=e455] [cursor=pointer]:
+          - option "Bengaluru" [selected]
+          - option "Delhi NCR"
+          - option "Mumbai"
+          - option "Hyderabad"
+          - option "Pune"
+          - option "Chennai"
+          - option "Ahmedabad"
+          - option "Kolkata"
+        - textbox [ref=e462]:
+          - /placeholder: Search companies or areas
+        - generic [ref=e463]:
+          - combobox "Filter by area" [ref=e465] [cursor=pointer]:
+            - option "All areas" [selected]
+            - option "Koramangala"
+            - option "Indiranagar"
+            - option "HSR Layout"
+            - option "Whitefield"
+          - button "Filters" [ref=e468] [cursor=pointer]
+        - generic [ref=e470]:
+          - button "All companies" [ref=e471] [cursor=pointer]
+          - button "Early career" [ref=e472] [cursor=pointer]
+      - generic [ref=e476]:
+        - generic [ref=e477]: 12 companies to explore
+        - generic [ref=e478]:
+          - button "Map view" [ref=e479] [cursor=pointer]
+          - button "List view" [ref=e482] [cursor=pointer]
+      - generic [ref=e546]:
+        - button "Razorpay Koramangala Fintech · Early career" [ref=e547] [cursor=pointer]:
+          - generic [ref=e549]:
+            - strong [ref=e550]: Razorpay
+            - generic [ref=e551]: Koramangala
+            - generic [ref=e555]: Fintech · Early career
+        - button "Swiggy Indiranagar Consumer tech" [ref=e558] [cursor=pointer]:
+          - generic [ref=e560]:
+            - strong [ref=e561]: Swiggy
+            - generic [ref=e562]: Indiranagar
+            - generic [ref=e566]: Consumer tech
+        - button "PhonePe HSR Layout SaaS" [ref=e569] [cursor=pointer]:
+          - generic [ref=e571]:
+            - strong [ref=e572]: PhonePe
+            - generic [ref=e573]: HSR Layout
+            - generic [ref=e577]: SaaS
+        - button "Ze Zerodha Whitefield Technology · Early career" [ref=e580] [cursor=pointer]:
+          - generic [ref=e581]: Ze
+          - generic [ref=e582]:
+            - strong [ref=e583]: Zerodha
+            - generic [ref=e584]: Whitefield
+            - generic [ref=e588]: Technology · Early career
+        - button "Meesho Koramangala Fintech" [ref=e591] [cursor=pointer]:
+          - generic [ref=e593]:
+            - strong [ref=e594]: Meesho
+            - generic [ref=e595]: Koramangala
+            - generic [ref=e599]: Fintech
+        - button "Groww Indiranagar Consumer tech" [ref=e602] [cursor=pointer]:
+          - generic [ref=e604]:
+            - strong [ref=e605]: Groww
+            - generic [ref=e606]: Indiranagar
+            - generic [ref=e610]: Consumer tech
+        - button "CRED HSR Layout SaaS · Early career" [ref=e613] [cursor=pointer]:
+          - generic [ref=e615]:
+            - strong [ref=e616]: CRED
+            - generic [ref=e617]: HSR Layout
+            - generic [ref=e621]: SaaS · Early career
+        - button "Ze Zepto Whitefield Technology" [ref=e624] [cursor=pointer]:
+          - generic [ref=e625]: Ze
+          - generic [ref=e626]:
+            - strong [ref=e627]: Zepto
+            - generic [ref=e628]: Whitefield
+            - generic [ref=e632]: Technology
+        - button "InMobi Koramangala Fintech" [ref=e635] [cursor=pointer]:
+          - generic [ref=e637]:
+            - strong [ref=e638]: InMobi
+            - generic [ref=e639]: Koramangala
+            - generic [ref=e643]: Fintech
+        - button "Fr Freshworks Indiranagar Consumer tech · Early career" [ref=e646] [cursor=pointer]:
+          - generic [ref=e647]: Fr
+          - generic [ref=e648]:
+            - strong [ref=e649]: Freshworks
+            - generic [ref=e650]: Indiranagar
+            - generic [ref=e654]: Consumer tech · Early career
+        - button "Fl Flipkart HSR Layout SaaS" [ref=e657] [cursor=pointer]:
+          - generic [ref=e658]: Fl
+          - generic [ref=e659]:
+            - strong [ref=e660]: Flipkart
+            - generic [ref=e661]: HSR Layout
+            - generic [ref=e665]: SaaS
+        - button "Postman Whitefield Technology" [ref=e668] [cursor=pointer]:
+          - generic [ref=e670]:
+            - strong [ref=e671]: Postman
+            - generic [ref=e672]: Whitefield
+            - generic [ref=e676]: Technology
+      - generic [ref=e484]: Curated sample data. Locations are approximate.Visit official career pages for current openings.
+    - generic [ref=e485]:
+      - generic [ref=e486]:
+        - generic "Interactive company map of Bengaluru" [ref=e487]:
+          - generic:
+            - generic:
+              - button "R" [ref=e488] [cursor=pointer]
+              - button "Sw" [ref=e491] [cursor=pointer]
+              - button "Ph" [ref=e494] [cursor=pointer]
+              - button "Ze" [ref=e497] [cursor=pointer]
+              - button "Me" [ref=e500] [cursor=pointer]
+              - button "Gr" [ref=e503] [cursor=pointer]
+              - button "CR" [ref=e506] [cursor=pointer]
+              - button "Ze" [ref=e509] [cursor=pointer]
+              - button "In" [ref=e512] [cursor=pointer]
+              - button "Fr" [ref=e515] [cursor=pointer]
+              - button "Fl" [ref=e518] [cursor=pointer]
+              - button "Po" [ref=e521] [cursor=pointer]
+          - generic:
+            - generic:
+              - generic [ref=e524]:
+                - button "Zoom in" [ref=e525] [cursor=pointer]: +
+                - button "Zoom out" [ref=e526] [cursor=pointer]: −
+              - generic [ref=e527]:
+                - link "Leaflet" [ref=e528] [cursor=pointer]:
+                  - /url: https://leafletjs.com
+                - text: "| Tiles © Esri, HERE, Garmin, OpenStreetMap contributors"
+        - generic [ref=e533]: Bengaluru, India
+        - button "Recenter map" [ref=e537] [cursor=pointer]
+      - generic [ref=e541]: 12 companies · Bengaluru

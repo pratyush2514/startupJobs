@@ -1,0 +1,213 @@
+import { useMemo, useState } from "react"
+import { cities, companies, type Company } from "../data"
+import { CompanyLogo } from "../components/CompanyLogo"
+import { MapCanvas } from "../components/MapCanvas"
+import { CitySection } from "../components/CitySection"
+import { HowItWorks } from "../components/HowItWorks"
+import { Pricing } from "../components/Pricing"
+import {
+  ArrowRight,
+  ArrowUpRight,
+  Check,
+  Compass,
+  Globe,
+  Pin,
+} from "../components/icons"
+import { useReveal } from "../lib/hooks"
+import { getLastCity, setLastCity } from "../lib/city"
+import { plural } from "../lib/utils"
+
+export default function HomePage({
+  theme,
+  onSelect,
+}: {
+  theme: "dark" | "light"
+  onSelect: (company: Company) => void
+}) {
+  const [cityId, setCityId] = useState(
+    () => getLastCity() ?? "bengaluru",
+  )
+  const city = cities.find((item) => item.id === cityId) ?? cities[0]
+  const cityCompanies = useMemo(
+    () => companies.filter((company) => company.city === city.id),
+    [city.id],
+  )
+  const featured = cityCompanies.slice(0, 9)
+  const neighbourhoods = useMemo(
+    () => new Set(companies.map((company) => company.area)).size,
+    [],
+  )
+  useReveal(`home-${city.id}`)
+
+  const chooseCity = (id: string) => {
+    setCityId(id)
+    setLastCity(id)
+  }
+
+  return (
+    <div className="home-page">
+      <section className="hero container">
+        <p className="hero-kicker">
+          <Pin size={14} />
+          {plural(companies.length, "startup", "startups")} across{" "}
+          {plural(cities.length, "city", "cities")}
+        </p>
+        <h1>
+          Explore India’s startups,
+          <br />
+          <span>on one map.</span>
+        </h1>
+        <p className="hero-lede">
+          Find a team by neighbourhood, then go straight to its own careers
+          page. Every pin is a real company; every role lives on its own site.
+        </p>
+        <div className="hero-actions">
+          <a href="#/map" className="button button-primary">
+            Open the map <ArrowUpRight size={16} />
+          </a>
+          <a href="#/companies" className="button button-secondary">
+            Browse companies
+          </a>
+        </div>
+        <p className="hero-note">
+          <Check size={13} /> Free to explore. No account or card needed.
+        </p>
+      </section>
+
+      <section className="atlas container" aria-label="Map preview">
+        <div className="atlas-head">
+          <div className="atlas-title">
+            <span className="atlas-mark" aria-hidden="true">
+              <Compass size={16} />
+            </span>
+            <span>
+              <strong>The startup atlas</strong>
+              <small>
+                {plural(cityCompanies.length, "company", "companies")} in{" "}
+                {city.name}
+              </small>
+            </span>
+          </div>
+          <a href={`#/map?city=${city.id}`} className="text-link">
+            Open the full map <ArrowUpRight size={15} />
+          </a>
+        </div>
+
+        <div className="city-switcher" role="group" aria-label="Choose a city">
+          {cities.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              className={item.id === city.id ? "is-active" : ""}
+              aria-pressed={item.id === city.id}
+              onClick={() => chooseCity(item.id)}
+            >
+              {item.name}
+            </button>
+          ))}
+        </div>
+
+        <div className="preview-map">
+          <MapCanvas
+            city={city}
+            companies={cityCompanies}
+            dark={theme === "dark"}
+            onSelect={onSelect}
+            preview
+          />
+        </div>
+
+        <div className="atlas-foot">
+          <span>
+            <Pin size={13} /> Office locations are approximate
+          </span>
+          <span>Curated sample directory</span>
+        </div>
+      </section>
+
+      <section className="stats container" aria-label="At a glance">
+        <div className="stat">
+          <strong>{companies.length}</strong>
+          <span>companies to discover</span>
+        </div>
+        <div className="stat">
+          <strong>{cities.length}</strong>
+          <span>startup cities</span>
+        </div>
+        <div className="stat">
+          <strong>{neighbourhoods}</strong>
+          <span>neighbourhoods mapped</span>
+        </div>
+        <div className="stat-note">
+          <Globe size={26} />
+          <p>
+            Built for your ambition.
+            <strong>Wherever it takes you.</strong>
+          </p>
+        </div>
+      </section>
+
+      <CitySection />
+      <HowItWorks />
+
+      <section className="section companies-feature container">
+        <div className="section-heading" data-reveal>
+          <div>
+            <p className="kicker">Great teams, real possibilities</p>
+            <h2>Your next team could be here.</h2>
+            <p className="section-sub">
+              A first look at the teams building in {city.name}.
+            </p>
+          </div>
+          <a
+            href={`#/companies?city=${city.id}`}
+            className="text-link"
+          >
+            All {plural(cityCompanies.length, "company", "companies")}{" "}
+            <ArrowRight size={15} />
+          </a>
+        </div>
+        <div className="company-grid" key={city.id}>
+          {featured.map((company) => (
+            <button
+              key={company.id}
+              type="button"
+              className="company-row"
+              onClick={() => onSelect(company)}
+              data-reveal
+            >
+              <CompanyLogo company={company} />
+              <span className="company-row-copy">
+                <strong>{company.name}</strong>
+                <small>
+                  {company.category}, {city.name}
+                </small>
+              </span>
+              <ArrowUpRight size={16} className="company-row-arrow" />
+            </button>
+          ))}
+        </div>
+        <p className="section-footnote">
+          A curated showcase. Visit each company’s careers page for the latest
+          openings.
+        </p>
+      </section>
+
+      <Pricing />
+
+      <section className="bottom-cta container">
+        <span className="cta-mark" aria-hidden="true">
+          <Compass size={26} />
+        </span>
+        <div className="bottom-cta-copy">
+          <p className="kicker">Your next chapter starts somewhere</p>
+          <h2>Let’s find your somewhere.</h2>
+          <p>A new team, a new city, or something closer to home.</p>
+        </div>
+        <a href="#/map" className="button button-primary">
+          Take a look around <ArrowUpRight size={16} />
+        </a>
+      </section>
+    </div>
+  )
+}
