@@ -50,8 +50,9 @@ export function Footer() {
           <h2>The fine print</h2>
           <p>
             An independent concept inspired by BLR Startup Arena. The directory
-            is curated sample data, locations are approximate, and career paths
-            are illustrative — not live vacancies.
+            lists verified companies only — office locations are approximate
+            localities, and open roles live on each company&rsquo;s official
+            careers page.
           </p>
           <a href="#/faq" className="text-link">
             Read the details <ArrowUpRight size={14} />
@@ -62,7 +63,7 @@ export function Footer() {
         <span>
           © {new Date().getFullYear()} Startup Arena · Independent concept
         </span>
-        <span>Curated sample data · Office locations approximate</span>
+        <span>Verified companies · Office locations approximate</span>
         <button
           type="button"
           className="footer-top-link"

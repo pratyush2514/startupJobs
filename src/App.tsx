@@ -45,6 +45,13 @@ export default function App() {
   const isKnown = knownPages.has(page)
 
   useEffect(() => {
+    // The jobs route is reserved for the live roles feed (Phase 2). Until
+    // real roles exist, it redirects to the verified company directory
+    // instead of showing mock listings.
+    if (page === "jobs") {
+      window.location.hash = "#/companies"
+      return
+    }
     setMobileNav(false)
     setSelected(null)
     if (lastPage.current !== page) {
@@ -125,11 +132,7 @@ export default function App() {
             {page === "cities" && <CitiesPage />}
 
             {(page === "companies" || page === "jobs") && (
-              <CompaniesPage
-                initialCity={cityParam}
-                careers={page === "jobs"}
-                onSelect={openCompany}
-              />
+              <CompaniesPage initialCity={cityParam} onSelect={openCompany} />
             )}
 
             {page === "pricing" && <PricingPage />}

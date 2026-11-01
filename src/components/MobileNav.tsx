@@ -136,7 +136,7 @@ export function MobileNav({
         </section>
 
         <div className="nav-dialog-foot">
-          <p>Opportunity, mapped. Curated sample directory.</p>
+          <p>Opportunity, mapped. Verified company directory.</p>
           <div className="nav-dialog-actions">
             <button
               type="button"

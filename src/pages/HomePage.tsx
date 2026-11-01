@@ -33,7 +33,10 @@ export default function HomePage({
   )
   const featured = cityCompanies.slice(0, 9)
   const neighbourhoods = useMemo(
-    () => new Set(companies.map((company) => company.area)).size,
+    () =>
+      new Set(
+        companies.map((company) => company.area).filter((a) => a != null),
+      ).size,
     [],
   )
   useReveal(`home-${city.id}`)
@@ -100,7 +103,7 @@ export default function HomePage({
         <p className="atlas-foot">
           <Pin size={12} /> Office locations are approximate
           <span className="dot" aria-hidden="true">·</span>
-          <span>Curated sample directory</span>
+          <span>Verified company directory</span>
         </p>
       </section>
 

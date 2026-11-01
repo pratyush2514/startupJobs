@@ -15,27 +15,16 @@ import {
   Close,
   MapIcon,
   Search,
-  Sprout,
 } from "../components/icons"
 import { cityFromParam, getLastCity, setLastCity } from "../lib/city"
 import { useReveal, useSearchShortcut } from "../lib/hooks"
 import { plural } from "../lib/utils"
 
-const industries = [
-  "All industries",
-  "Fintech",
-  "Consumer tech",
-  "SaaS",
-  "Technology",
-]
-
 export default function CompaniesPage({
   initialCity,
-  careers = false,
   onSelect,
 }: {
   initialCity: string | null
-  careers?: boolean
   onSelect: (company: Parameters<typeof DirectoryCard>[0]["company"]) => void
 }) {
   const [cityId, setCityId] = useState(
@@ -45,67 +34,59 @@ export default function CompaniesPage({
   const [search, setSearch] = useState("")
   const deferredSearch = useDeferredValue(search)
   const [category, setCategory] = useState("All industries")
-  const [fresher, setFresher] = useState(false)
   const searchRef = useRef<HTMLInputElement>(null)
-  useReveal(`companies-${cityId}-${careers}`)
+  useReveal(`companies-${cityId}`)
   useSearchShortcut(() => searchRef.current?.focus())
 
   useEffect(() => {
     setLastCity(cityId)
-    const next = `#/${careers ? "jobs" : "companies"}?city=${cityId}`
+    const next = `#/companies?city=${cityId}`
     if (window.location.hash !== next) {
       window.history.replaceState(null, "", next)
     }
-    document.title = `${
-      careers ? "Career paths" : "Companies"
-    } in ${city.name} — Startup Arena`
-  }, [cityId, city.name, careers])
+    document.title = `Companies in ${city.name} — Startup Arena`
+  }, [cityId, city.name])
 
   const cityCompanies = useMemo(
     () => companies.filter((company) => company.city === city.id),
     [city.id],
   )
 
+  const industries = useMemo(
+    () => [
+      "All industries",
+      ...Array.from(new Set(cityCompanies.map((c) => c.category))).sort(),
+    ],
+    [cityCompanies],
+  )
+
   const filtered = useMemo(() => {
     const term = deferredSearch.trim().toLowerCase()
     return cityCompanies.filter((company) => {
-      const haystack = `${company.name} ${company.area} ${company.category}`.toLowerCase()
+      const haystack =
+        `${company.name} ${company.area ?? ""} ${company.category}`.toLowerCase()
       return (
         (!term || haystack.includes(term)) &&
-        (!fresher || company.fresher) &&
         (category === "All industries" || company.category === category)
       )
     })
-  }, [cityCompanies, deferredSearch, fresher, category])
+  }, [cityCompanies, deferredSearch, category])
 
   const clearAll = () => {
     setSearch("")
     setCategory("All industries")
-    setFresher(false)
   }
 
   return (
     <div className="inner-page directory-page">
       <PageIntro
-        kicker={
-          careers ? "Make your next move" : "The teams building tomorrow"
-        }
+        kicker="The teams building tomorrow"
         title={
-          careers ? (
-            <>
-              Discover your next <span className="accent">direction.</span>
-            </>
-          ) : (
-            <>
-              Good companies. Great <span className="accent">possibilities.</span>
-            </>
-          )
+          <>
+            Good companies. Great <span className="accent">possibilities.</span>
+          </>
         }
-        lede={
-          careers
-            ? "Explore the kinds of work happening across India’s startup ecosystem, then check current openings on each company’s own site."
-            : "Get to know the companies shaping India’s startup ecosystem — by city, by neighbourhood, by the work they do."
-        }
+        lede="Get to know the verified companies shaping India’s startup ecosystem — by city, by neighbourhood, by the work they do. Open roles live on each company’s own careers page."
       />
 
       <section className="directory-body container">
@@ -171,18 +152,10 @@ export default function CompaniesPage({
                 {item}
               </button>
             ))}
-            <button
-              type="button"
-              className={`filter-chip-early${fresher ? " is-active" : ""}`}
-              aria-pressed={fresher}
-              onClick={() => setFresher((value) => !value)}
-            >
-              <Sprout size={13} /> Early career
-            </button>
           </div>
           <p className="directory-summary" aria-live="polite">
             {plural(filtered.length, "company", "companies")} in {city.name}
-            {(category !== "All industries" || fresher || search) && (
+            {(category !== "All industries" || search) && (
               <button type="button" className="text-button" onClick={clearAll}>
                 Clear
               </button>
@@ -197,7 +170,6 @@ export default function CompaniesPage({
                 key={company.id}
                 company={company}
                 onSelect={onSelect}
-                careers={careers}
               />
             ))}
           </div>
@@ -217,8 +189,9 @@ export default function CompaniesPage({
 
         <div className="directory-footer-note">
           <p>
-            Curated sample directory. Office locations are approximate and
-            career paths are illustrative, not live vacancies.
+            Verified company directory. Office locations are approximate
+            localities — open roles live on each company&rsquo;s official
+            careers page.
           </p>
           <a href={`#/map?city=${city.id}`} className="text-link">
             See {city.name} on the map <ArrowUpRight size={14} />

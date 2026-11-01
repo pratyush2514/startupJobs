@@ -68,10 +68,11 @@ export default function AboutPage() {
           </p>
           <p>
             This is an independent frontend concept inspired by BLR Startup
-            Arena, expanded to eight Indian cities. The directory is curated
-            sample data, locations are approximate, and career paths are
-            illustrative. It is not affiliated with the original platform or the
-            featured companies.
+            Arena, expanded to eight Indian cities. The directory lists
+            verified companies only — office locations are approximate
+            localities, and open roles live on each company&rsquo;s official
+            careers page. It is not affiliated with the original platform or
+            the featured companies.
           </p>
         </div>
       </section>
@@ -100,7 +101,7 @@ export default function AboutPage() {
               <Check size={14} /> Applications happen on company sites
             </li>
             <li>
-              <Check size={14} /> Sample data, clearly labelled
+              <Check size={14} /> Verified companies, clearly sourced
             </li>
           </ul>
         </div>

@@ -268,12 +268,13 @@ export default function MapView({
         iconAnchor: [21, 48],
       })
 
+      const place = company.area ?? city.name
       const marker = L.marker([company.lat, company.lng], {
         icon,
         keyboard: true,
         riseOnHover: true,
-        title: `${company.name}, ${company.area}`,
-        alt: `${company.name}, ${company.area}`,
+        title: `${company.name}, ${place}`,
+        alt: `${company.name}, ${place}`,
       })
 
       const tooltip = document.createElement("div")
@@ -281,7 +282,7 @@ export default function MapView({
       const name = document.createElement("strong")
       name.textContent = company.name
       const area = document.createElement("span")
-      area.textContent = `${company.area} · ${company.category}`
+      area.textContent = `${place} · ${company.category}`
       tooltip.append(name, area)
 
       marker.bindTooltip(tooltip, {

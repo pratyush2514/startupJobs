@@ -1,15 +1,13 @@
 import { type Company } from "../data"
 import { CompanyLogo } from "./CompanyLogo"
-import { ArrowRight, ArrowUpRight, Briefcase, Pin } from "./icons"
+import { ArrowRight, ArrowUpRight, Pin } from "./icons"
 
 export function DirectoryCard({
   company,
   onSelect,
-  careers = false,
 }: {
   company: Company
   onSelect: (company: Company) => void
-  careers?: boolean
 }) {
   return (
     <article className="directory-card">
@@ -17,8 +15,8 @@ export function DirectoryCard({
         type="button"
         className="directory-card-action"
         onClick={() => onSelect(company)}
-        aria-label={`View ${company.name}, ${company.area}${
-          careers ? `, ${company.category}` : ""
+        aria-label={`View ${company.name}${
+          company.area ? `, ${company.area}` : ""
         }`}
       >
         <span className="directory-card-top">
@@ -28,18 +26,14 @@ export function DirectoryCard({
           </span>
         </span>
         <span className="directory-card-title">{company.name}</span>
-        <span className="directory-card-meta">
-          <Pin size={12} /> {company.area}
-        </span>
-        <span className="directory-tags">
-          <span>{company.category}</span>
-          {company.fresher && <span>Early career</span>}
-        </span>
-        {careers && (
-          <span className="career-note">
-            <Briefcase size={13} /> Three example career paths
+        {company.area && (
+          <span className="directory-card-meta">
+            <Pin size={12} /> {company.area}
           </span>
         )}
+        <span className="directory-tags">
+          <span>{company.category}</span>
+        </span>
         <span className="directory-card-foot">
           Explore the company <ArrowRight size={14} />
         </span>

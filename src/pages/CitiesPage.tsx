@@ -69,7 +69,7 @@ export default function CitiesPage() {
       </section>
 
       <p className="fine-print container">
-        {plural(cities.length, "city", "cities")} · Curated sample directory ·
+        {plural(cities.length, "city", "cities")} · Verified company directory ·
         Office locations are approximate
       </p>
     </div>

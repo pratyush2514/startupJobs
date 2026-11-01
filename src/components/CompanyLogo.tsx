@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { type Company, logoUrl } from "../data"
+import { type Company, companyLogo } from "../data"
 import { initials, readableOn } from "../lib/utils"
 
 type Size = "sm" | "md" | "lg"
@@ -15,6 +15,7 @@ export function CompanyLogo({
 }) {
   const [loaded, setLoaded] = useState(false)
   const [failed, setFailed] = useState(false)
+  const src = companyLogo(company)
 
   return (
     <span
@@ -28,9 +29,9 @@ export function CompanyLogo({
       aria-hidden="true"
     >
       <span className="company-logo-fallback">{initials(company.name)}</span>
-      {!failed && (
+      {src && !failed && (
         <img
-          src={logoUrl(company.slug)}
+          src={src}
           alt=""
           width={48}
           height={48}

@@ -635,14 +635,14 @@ kbd {
 .search-clear:hover { background: var(--surface-3); color: var(--text); }
 .directory-filters { margin-top: 16px; }
 .filter-chips { display: flex; gap: 8px; flex-wrap: wrap; }
-.filter-chips button, .filter-chip-early {
+.filter-chips button {
   display: inline-flex; align-items: center; gap: 7px;
   padding: 8px 14px; border-radius: 999px; font-size: 12.5px; font-weight: 500;
   border: 1px solid var(--line); background: var(--surface); color: var(--muted);
   transition: background-color .2s, color .2s, border-color .2s;
 }
-.filter-chips button:hover, .filter-chip-early:hover { color: var(--text); border-color: var(--line-strong); }
-.filter-chips button.is-active, .filter-chip-early.is-active {
+.filter-chips button:hover { color: var(--text); border-color: var(--line-strong); }
+.filter-chips button.is-active {
   background: var(--text); border-color: var(--text); color: var(--bg);
 }
 .directory-summary {
@@ -669,10 +669,6 @@ kbd {
   font-size: 11px; font-weight: 500; color: var(--muted);
   background: var(--surface-2); border: 1px solid var(--line);
   border-radius: 999px; padding: 3px 10px;
-}
-.career-note {
-  display: flex; align-items: center; gap: 7px;
-  font-size: 12px; color: var(--faint); margin-top: 12px;
 }
 .directory-card-foot {
   display: flex; align-items: center; justify-content: space-between;
@@ -740,29 +736,6 @@ kbd {
 .filter-panel-head strong { font-size: 13.5px; font-weight: 600; }
 .filter-group { display: grid; gap: 9px; }
 .filter-label { font-size: 11.5px; font-weight: 600; color: var(--faint); }
-.switch-row {
-  display: flex; align-items: center; gap: 12px; width: 100%;
-  border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; background: var(--bg-raise);
-}
-.switch-row-icon {
-  width: 32px; height: 32px; flex-shrink: 0;
-  display: inline-flex; align-items: center; justify-content: center;
-  background: var(--surface-2); border: 1px solid var(--line); border-radius: 9px; color: var(--text);
-}
-.switch-row-copy { flex: 1; min-width: 0; }
-.switch-row-copy strong { display: block; font-size: 13px; font-weight: 550; }
-.switch-row-copy small { display: block; font-size: 11.5px; color: var(--muted); margin-top: 1px; }
-.switch {
-  width: 38px; height: 22px; flex-shrink: 0; border-radius: 999px;
-  background: var(--surface-3); border: 1px solid var(--line-strong); position: relative;
-  transition: background-color .25s;
-}
-.switch > span {
-  position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 999px;
-  background: var(--muted); transition: translate .25s var(--ease), background-color .25s;
-}
-.switch.is-on { background: var(--text); border-color: var(--text); }
-.switch.is-on > span { translate: 16px 0; background: var(--bg); }
 .filter-done { width: 100%; }
 .active-filters { display: flex; flex-wrap: wrap; gap: 7px; }
 .active-filters button:not(.active-filters-clear) {
@@ -990,23 +963,6 @@ kbd {
 }
 .company-note svg { flex-shrink: 0; color: var(--faint); margin-top: 1px; }
 .company-note p { font-size: 12px; line-height: 1.65; color: var(--muted); }
-.company-dialog-subhead { font-size: 13px; margin: 22px 0 10px; }
-.career-paths { display: grid; gap: 8px; }
-.career-path {
-  display: flex; align-items: center; gap: 12px;
-  border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; background: var(--bg-raise);
-}
-.career-path-icon {
-  width: 32px; height: 32px; flex-shrink: 0;
-  display: inline-flex; align-items: center; justify-content: center;
-  background: var(--surface-2); border: 1px solid var(--line); border-radius: 9px; color: var(--text);
-}
-.career-path strong { display: block; font-size: 13px; font-weight: 550; }
-.career-path small { display: block; font-size: 11.5px; color: var(--muted); margin-top: 1px; }
-.career-path-team {
-  margin-left: auto; flex-shrink: 0; font-size: 11px; color: var(--faint);
-  border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px;
-}
 .company-dialog-cta { width: 100%; margin-top: 22px; justify-content: space-between; padding: 13px 18px; }
 .company-dialog-cta span { display: grid; text-align: left; }
 .company-dialog-cta small { font-size: 11px; font-weight: 400; opacity: .65; margin-top: 1px; }

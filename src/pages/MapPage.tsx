@@ -21,7 +21,6 @@ import {
   Pin,
   Search,
   Sliders,
-  Sprout,
 } from "../components/icons"
 import {
   useReveal,
@@ -31,14 +30,6 @@ import { cityFromParam, getLastCity, setLastCity } from "../lib/city"
 import { plural } from "../lib/utils"
 
 type View = "map" | "list"
-
-const industries = [
-  "All industries",
-  "Fintech",
-  "Consumer tech",
-  "SaaS",
-  "Technology",
-]
 
 function countIn(list: Company[], area: string) {
   return list.filter((company) => company.area === area).length
@@ -65,7 +56,6 @@ export default function MapPage({
   const deferredSearch = useDeferredValue(search)
   const [area, setArea] = useState("All areas")
   const [category, setCategory] = useState("All industries")
-  const [fresher, setFresher] = useState(false)
   const [filtersOpen, setFiltersOpen] = useState(false)
   const [view, setView] = useState<View>("map")
   const searchRef = useRef<HTMLInputElement>(null)
@@ -112,30 +102,34 @@ export default function MapPage({
     }
   }, [filtersOpen])
 
+  const industries = useMemo(
+    () => [
+      "All industries",
+      ...Array.from(new Set(allCityCompanies.map((c) => c.category))).sort(),
+    ],
+    [allCityCompanies],
+  )
+
   const filtered = useMemo(() => {
     const term = deferredSearch.trim().toLowerCase()
     return allCityCompanies.filter((company) => {
-      const haystack = `${company.name} ${company.area} ${company.category}`.toLowerCase()
+      const haystack =
+        `${company.name} ${company.area ?? ""} ${company.category}`.toLowerCase()
       return (
         (!term || haystack.includes(term)) &&
         (area === "All areas" || company.area === area) &&
-        (!fresher || company.fresher) &&
         (category === "All industries" || company.category === category)
       )
     })
-  }, [allCityCompanies, deferredSearch, area, fresher, category])
+  }, [allCityCompanies, deferredSearch, area, category])
 
-  const hasFilters =
-    area !== "All areas" || category !== "All industries" || fresher
+  const hasFilters = area !== "All areas" || category !== "All industries"
   const filterCount =
-    Number(area !== "All areas") +
-    Number(category !== "All industries") +
-    Number(fresher)
+    Number(area !== "All areas") + Number(category !== "All industries")
 
   const clearFilters = () => {
     setArea("All areas")
     setCategory("All industries")
-    setFresher(false)
   }
 
   const clearEverything = () => {
@@ -270,23 +264,6 @@ export default function MapPage({
                 </div>
                 <button
                   type="button"
-                  className="switch-row"
-                  aria-pressed={fresher}
-                  onClick={() => setFresher((value) => !value)}
-                >
-                  <span className="switch-row-icon">
-                    <Sprout size={16} />
-                  </span>
-                  <span className="switch-row-copy">
-                    <strong>Early career</strong>
-                    <small>Show teams that welcome first-time applicants</small>
-                  </span>
-                  <span className={`switch${fresher ? " is-on" : ""}`}>
-                    <span />
-                  </span>
-                </button>
-                <button
-                  type="button"
                   className="button button-primary filter-done"
                   onClick={() => setFiltersOpen(false)}
                 >
@@ -313,11 +290,6 @@ export default function MapPage({
                     onClick={() => setCategory("All industries")}
                   >
                     {category} <Close size={12} />
-                  </button>
-                )}
-                {fresher && (
-                  <button type="button" onClick={() => setFresher(false)}>
-                    Early career <Close size={12} />
                   </button>
                 )}
                 <button
@@ -374,13 +346,12 @@ export default function MapPage({
               <CompanyLogo company={company} />
               <span className="result-copy">
                 <strong>{company.name}</strong>
-                <span className="result-place">
-                  <Pin size={11} /> {company.area}
-                </span>
-                <small>
-                  {company.category}
-                  {company.fresher && <span>Early career</span>}
-                </small>
+                {company.area && (
+                  <span className="result-place">
+                    <Pin size={11} /> {company.area}
+                  </span>
+                )}
+                <small>{company.category}</small>
               </span>
               <ArrowRight size={16} className="result-arrow" />
             </button>
@@ -398,8 +369,8 @@ export default function MapPage({
         </div>
 
         <div className="explorer-disclaimer">
-          Curated sample data. Office locations are approximate. Visit official
-          careers pages for current openings.
+          Verified company directory. Office locations are approximate. Visit
+          official careers pages for current openings.
         </div>
       </aside>
 
