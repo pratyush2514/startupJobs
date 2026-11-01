@@ -27,6 +27,9 @@ jobs:
 
       - name: Fetch roles from public feeds
         run: python3 scripts/fetch-roles.py
+      - name: Re-apply Playwright scraper roles
+        run: python3 scripts/scrape-playwright/merge.py
+
 
       - name: Commit if changed
         run: |
