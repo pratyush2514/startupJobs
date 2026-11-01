@@ -36,6 +36,24 @@ from datetime import datetime, timezone
 RAPIDAPI_HOST = "company-career-sites-jobs-api1.p.rapidapi.com"
 RAPIDAPI_URL = f"https://{RAPIDAPI_HOST}/api/public/v1/jobs"
 
+# Aggregator domains that must never appear as an applyUrl — every role
+# has to link to the company's OWN posting, never a middleman board.
+BLOCKED_APPLY_DOMAINS = {
+    "himalayas.app",
+    "www.himalayas.app",
+    "linkedin.com",
+    "www.linkedin.com",
+    "indeed.com",
+    "www.indeed.com",
+    "naukri.com",
+    "www.naukri.com",
+}
+
+
+def apply_url_ok(url):
+    host = urllib.parse.urlparse(url or "").hostname or ""
+    return host not in BLOCKED_APPLY_DOMAINS
+
 # Greenhouse board token -> our company ids (one board can feed two city pins)
 BOARDS = {
     "druva": ["pune-druva"],
@@ -427,6 +445,8 @@ def run_rapidapi(api_key, roles, per_company, only=None):
             r = normalize_rapidapi_job(j, "rapidapi")
             if not r["title"] or not r["applyUrl"]:
                 continue
+            if not apply_url_ok(r["applyUrl"]):
+                continue  # aggregator mirror, not the company's own posting
             city = infer_city(r["city_hint"] or "", None)
             target = (
                 next((c for c in cids if c.startswith(city + "-")), cids[0])
