@@ -60,6 +60,16 @@ SMARTRECRUITERS = {
     "Freshworks": ["bengaluru-freshworks", "chennai-freshworks"],
 }
 
+# Ashby board slug -> our company ids (public JSON, no key)
+ASHBY_BOARDS = {}
+
+# Keka: (subdomain, portal identifier) -> our company ids.
+# The identifier comes from the careers page's embed script URL:
+#   {sub}.keka.com/careers -> /careers/api/embedjobs/js/{identifier}
+KEKA_PORTALS = {
+    ("bacancy", "24b25cc8-8f4c-48f1-905a-60b46a99c09c"): ["ahmedabad-bacancy"],
+}
+
 CITY_HINTS = {
     "bengaluru": ["bengaluru", "bangalore"],
     "delhi": ["delhi", "gurugram", "gurgaon", "noida"],
@@ -140,17 +150,91 @@ def smartrecruiters_role(posting, company, cid):
     loc = posting.get("location") or {}
     country = loc.get("country") or ""
     city = loc.get("city") or ""
+    func = posting.get("function") or ""
+    if isinstance(func, dict):
+        func = func.get("label") or ""
     return {
         "id": f"sr-{cid}-{posting.get('id')}",
         "companyId": cid,
         "title": clean(posting.get("name")),
-        "team": clean((posting.get("function") or "")),
+        "team": clean(func),
         "level": None,
         "location": clean(f"{city}, {country}".strip(", ")),
         "city": infer_city(f"{city} {country}", cid.split("-")[0]),
         "workMode": None,
         "postedAt": (posting.get("releasedDate") or "")[:10] or None,
         "applyUrl": f"https://jobs.smartrecruiters.com/{company}/{posting.get('id')}",
+    }
+
+
+def fetch_ashby(slug):
+    """Public Ashby job-board API — no key needed."""
+    url = f"https://api.ashbyhq.com/posting-api/job-board/{slug}"
+    req = urllib.request.Request(
+        url, headers={"User-Agent": "startup-arena/1.0"}
+    )
+    with urllib.request.urlopen(req, timeout=25) as res:
+        return json.load(res).get("jobs", [])
+
+
+def ashby_role(posting, cid):
+    loc = posting.get("locationName") or ""
+    wt = (posting.get("workplaceType") or "").lower()
+    return {
+        "id": f"ashby-{cid}-{posting.get('id')}",
+        "companyId": cid,
+        "title": clean(posting.get("title")),
+        "team": clean(posting.get("departmentName")),
+        "level": None,
+        "location": clean(loc),
+        "city": infer_city(loc, cid.split("-")[0]),
+        "workMode": "remote"
+        if wt == "remote" or posting.get("isRemote")
+        else ("hybrid" if wt == "hybrid" else ("onsite" if wt == "on-site" else None)),
+        "postedAt": (posting.get("publishedAt") or "")[:10] or None,
+        "applyUrl": posting.get("jobUrl"),
+    }
+
+
+def fetch_keka(subdomain, identifier):
+    """Public Keka careers embed API — no key needed.
+
+    The portal identifier is per-company; grab it from the careers page:
+      {sub}.keka.com/careers -> /careers/api/embedjobs/js/{identifier}
+    """
+    url = (
+        f"https://{subdomain}.keka.com/careers/api/embedjobs/"
+        f"default/active/{identifier}"
+    )
+    req = urllib.request.Request(
+        url,
+        headers={
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36"
+        },
+    )
+    with urllib.request.urlopen(req, timeout=25) as res:
+        data = json.load(res)
+    return data if isinstance(data, list) else []
+
+
+def keka_role(job, subdomain, cid):
+    locs = job.get("jobLocations") or []
+    india = [l for l in locs if (l.get("countryCode") or "").upper() == "IN"]
+    loc = india[0] if india else (locs[0] if locs else {})
+    city = loc.get("city") or ""
+    loc_name = loc.get("name") or ""
+    return {
+        "id": f"keka-{cid}-{job.get('id')}",
+        "companyId": cid,
+        "title": clean(job.get("title")),
+        "team": clean(job.get("departmentName")),
+        "level": clean(job.get("experience")),
+        "location": clean(f"{city}, India" if city and india else loc_name),
+        "city": infer_city(f"{city} India", cid.split("-")[0]),
+        "workMode": "remote" if loc_name.lower() == "remote" else None,
+        "postedAt": (job.get("publishedOn") or "")[:10] or None,
+        "applyUrl": f"https://{subdomain}.keka.com/careers/jobdetails/{job.get('id')}",
     }
 
 
@@ -194,6 +278,10 @@ INDIAN_STATES = {
 }
 
 _CITY_HINT_WORDS = {h for hints in CITY_HINTS.values() for h in hints}
+
+
+def clean(s):
+    return re.sub(r"\s+", " ", (s or "").strip()) or None
 
 
 def looks_india(location_text):
@@ -316,6 +404,8 @@ def run_rapidapi(api_key, roles, per_company, only=None):
     covered_ids = {cid for ids in BOARDS.values() for cid in ids}
     covered_ids |= {cid for ids in LEVER_BOARDS.values() for cid in ids}
     covered_ids |= {cid for ids in SMARTRECRUITERS.values() for cid in ids}
+    covered_ids |= {cid for ids in ASHBY_BOARDS.values() for cid in ids}
+    covered_ids |= {cid for ids in KEKA_PORTALS.values() for cid in ids}
     by_name = {}
     for cid, name in companies:
         if cid in covered_ids:
@@ -439,6 +529,38 @@ def main():
                 role["city"] = city or target.split("-")[0]
                 roles.append(role)
                 per_company[target] = per_company.get(target, 0) + 1
+    for slug, company_ids in ASHBY_BOARDS.items():
+        try:
+            postings = fetch_ashby(slug)
+        except Exception as e:
+            print(f"WARN ashby {slug}: {e}")
+            continue
+        for post in postings:
+            loc = post.get("locationName") or ""
+            if not looks_india(loc):
+                continue
+            for cid in company_ids:
+                role = ashby_role(post, cid)
+                if role["title"] and role["applyUrl"]:
+                    roles.append(role)
+                    per_company[cid] = per_company.get(cid, 0) + 1
+    for (subdomain, identifier), company_ids in KEKA_PORTALS.items():
+        try:
+            jobs = fetch_keka(subdomain, identifier)
+        except Exception as e:
+            print(f"WARN keka {subdomain}: {e}")
+            continue
+        for job in jobs:
+            locs = job.get("jobLocations") or []
+            if not any(
+                (l.get("countryCode") or "").upper() == "IN" for l in locs
+            ):
+                continue
+            for cid in company_ids:
+                role = keka_role(job, subdomain, cid)
+                if role["title"]:
+                    roles.append(role)
+                    per_company[cid] = per_company.get(cid, 0) + 1
     api_key = os.environ.get("RAPIDAPI_KEY")
     if api_key:
         only = None
