@@ -81,6 +81,12 @@ SMARTRECRUITERS = {
 # Ashby board slug -> our company ids (public JSON, no key)
 ASHBY_BOARDS = {}
 
+# Kula (careers.kula.ai) board slug -> our company ids.
+# Kula is a Next.js board; jobs come from the __next_f flight data.
+KULA_BOARDS = {
+    "rocketlane": ["chennai-rocketlane"],
+}
+
 # Keka: (subdomain, portal identifier) -> our company ids.
 # The identifier comes from the careers page's embed script URL:
 #   {sub}.keka.com/careers -> /careers/api/embedjobs/js/{identifier}
@@ -114,6 +120,102 @@ def fetch_lever(slug):
     with urllib.request.urlopen(req, timeout=25) as res:
         data = json.load(res)
     return data if isinstance(data, list) else []
+
+
+_KULA_BS = chr(92)  # backslash — avoids literal-escaping ambiguity
+
+
+def _kula_unescape(s):
+    """Decode Kula flight payload (escaped quotes / unicode)."""
+    s = re.sub(_KULA_BS + _KULA_BS + "u([0-9a-fA-F]{4})",
+               lambda m: chr(int(m.group(1), 16)), s)
+    s = s.replace(_KULA_BS + '"', '"')
+    s = s.replace(_KULA_BS + _KULA_BS, _KULA_BS)
+    return s
+
+
+def fetch_kula(company):
+    """Kula (careers.kula.ai) board — jobs are embedded in the Next.js
+    flight data, no key needed. Returns (jobs, id_to_slug)."""
+    url = f"https://careers.kula.ai/{company}"
+    req = urllib.request.Request(url, headers={"User-Agent": "startup-arena/1.0"})
+    with urllib.request.urlopen(req, timeout=30) as res:
+        html = res.read(3_000_000).decode("utf-8", "ignore")
+    payloads = re.findall(r'self\.__next_f\.push\(\[1,"(.*?)"\]\)</script>', html, re.S)
+    blob = _kula_unescape("".join(payloads))
+    id_to_slug = dict(
+        re.findall(r'href="/' + re.escape(company) + r'/(\d+)-([^"]+)"', html)
+    )
+    jobs = []
+    for m in re.finditer(r'"id":(\d+),"account_id":\d+,"title":"((?:[^"\\]|\\.)*?)"', blob):
+        jid, title = m.group(1), m.group(2)
+        seg = blob[m.start() : m.start() + 6000]
+        launch = re.search(r'"launch_at":"([^"]+?)"', seg)
+        dept = re.search(
+            r'"ats_department":\{"id":\d+,"name":"((?:[^"\\]|\\.)*?)"', seg
+        )
+        listed = re.search(r'"listed":(true|false)', seg)
+        offices = []
+        om = re.search(r'"offices":\[(.*?)\](,|})', seg)
+        if om:
+            for part in re.split(r'\{"id":', om.group(1)):
+                if not part.strip():
+                    continue
+                oseg = '{"id":' + part[:900]
+
+                def _f(p, s=oseg):
+                    mm = re.search(p, s)
+                    return mm.group(1) if mm else None
+
+                offices.append({
+                    "location": _f(r'"location":"((?:[^"\\]|\\.)*?)"'),
+                    "country_code": _f(r'"country_code":"([A-Z]{2})"'),
+                    "city": _f(r'"city":"((?:[^"\\]|\\.)*?)"'),
+                    "remote": bool(re.search(r'"remote":true', oseg)),
+                    "workplace": _f(r'"workplace":"([a-z_]+)"'),
+                })
+        jobs.append({
+            "id": jid,
+            "title": title,
+            "launch_at": launch.group(1) if launch else None,
+            "department": dept.group(1) if dept else None,
+            "listed": (listed.group(1) == "true") if listed else True,
+            "offices": offices,
+        })
+    return jobs, id_to_slug
+
+
+def kula_role(job, company, cid, id_to_slug):
+    offices = job.get("offices") or []
+    india = [o for o in offices if (o.get("country_code") or "").upper() == "IN"]
+    if not india:
+        return None
+    o = india[0]
+    slug = id_to_slug.get(job["id"])
+    if slug:
+        apply = f"https://careers.kula.ai/{company}/{job['id']}-{slug}"
+    else:
+        apply = f"https://careers.kula.ai/{company}"
+    wm = None
+    if o.get("remote"):
+        wm = "remote"
+    elif o.get("workplace") == "remote":
+        wm = "remote"
+    elif o.get("workplace") == "office":
+        wm = "onsite"
+    posted = job.get("launch_at")
+    return {
+        "id": f"kula-{cid}-{job['id']}",
+        "companyId": cid,
+        "title": job["title"],
+        "team": job.get("department"),
+        "level": None,
+        "location": o.get("location") or o.get("name"),
+        "city": infer_city(o.get("location") or "", cid.split("-")[0]),
+        "workMode": wm,
+        "postedAt": posted[:10] if posted else None,
+        "applyUrl": apply,
+    }
 
 
 def fetch_smartrecruiters(company):
@@ -424,6 +526,7 @@ def run_rapidapi(api_key, roles, per_company, only=None):
     covered_ids |= {cid for ids in SMARTRECRUITERS.values() for cid in ids}
     covered_ids |= {cid for ids in ASHBY_BOARDS.values() for cid in ids}
     covered_ids |= {cid for ids in KEKA_PORTALS.values() for cid in ids}
+    covered_ids |= {cid for ids in KULA_BOARDS.values() for cid in ids}
     by_name = {}
     for cid, name in companies:
         if cid in covered_ids:
@@ -579,6 +682,20 @@ def main():
             for cid in company_ids:
                 role = keka_role(job, subdomain, cid)
                 if role["title"]:
+                    roles.append(role)
+                    per_company[cid] = per_company.get(cid, 0) + 1
+    for company, company_ids in KULA_BOARDS.items():
+        try:
+            jobs, id_to_slug = fetch_kula(company)
+        except Exception as e:
+            print(f"WARN kula {company}: {e}")
+            continue
+        for job in jobs:
+            if not job.get("listed", True):
+                continue
+            for cid in company_ids:
+                role = kula_role(job, company, cid, id_to_slug)
+                if role:
                     roles.append(role)
                     per_company[cid] = per_company.get(cid, 0) + 1
     api_key = os.environ.get("RAPIDAPI_KEY")
