@@ -14,13 +14,7 @@ COMPANIES = [
         "note": "Darwinbox portal gated behind Google SSO login (verified 2026-11-02) — "
                 "no public listings route; needs user sign-in or an alternate source",
     },
-    {
-        "cids": ["bengaluru-phonepe"],
-        "name": "PhonePe",
-        "url": "https://www.phonepe.com/careers/job-openings/",
-        "wait_ms": 12000,
-        "note": "Gatsby SPA; jobs API only visible at runtime",
-    },
+
 
     {
         "cids": ["delhi-zomato"],

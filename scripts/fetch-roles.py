@@ -76,6 +76,9 @@ LEVER_BOARDS = {
 # SmartRecruiters company name -> our company ids (public JSON, no key)
 SMARTRECRUITERS = {
     "Freshworks": ["bengaluru-freshworks", "chennai-freshworks"],
+    # Discovered 2026-11-02 via browser extraction: PhonePe's board is
+    # SmartRecruiters (jobs.smartrecruiters.com/PHONEPELIMITED), 131 roles.
+    "PHONEPELIMITED": ["bengaluru-phonepe"],
 }
 
 # Ashby board slug -> our company ids (public JSON, no key)
