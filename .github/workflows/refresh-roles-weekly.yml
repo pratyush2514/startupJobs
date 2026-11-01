@@ -1,0 +1,41 @@
+name: Refresh roles (free feeds, weekly)
+
+# Pulls every company's public ATS / careers JSON feed and commits the
+# regenerated src/roles.ts to the redesign branch. No API keys needed.
+# Runs weekly + on demand. The monthly RapidAPI drip lives in
+# refresh-roles-monthly.yml (separate quota).
+
+on:
+  schedule:
+    - cron: "0 2 * * 0" # Sundays 02:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: redesign
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Fetch roles from public feeds
+        run: python3 scripts/fetch-roles.py
+
+      - name: Commit if changed
+        run: |
+          git config user.name "roles-bot"
+          git config user.email "roles-bot@users.noreply.github.com"
+          git add src/roles.ts
+          if git diff --cached --quiet; then
+            echo "no role changes"
+          else
+            git commit -m "chore: weekly roles refresh $(date -u +%F)"
+            git push origin redesign
+          fi

@@ -1,0 +1,43 @@
+name: Refresh roles (RapidAPI drip, monthly)
+
+# Once a month, pulls the companies that have no public JSON feed via the
+# Company Career Sites Jobs API (RapidAPI free tier ~50 req/month).
+# Needs the repo secret RAPIDAPI_KEY. Skips automatically if unset.
+# Companies already covered by free direct feeds are skipped by the script.
+
+on:
+  schedule:
+    - cron: "0 3 1 * *" # 1st of each month, 03:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: redesign
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Fetch roles (free feeds + RapidAPI drip)
+        env:
+          RAPIDAPI_KEY: ${{ secrets.RAPIDAPI_KEY }}
+        run: python3 scripts/fetch-roles.py
+
+      - name: Commit if changed
+        run: |
+          git config user.name "roles-bot"
+          git config user.email "roles-bot@users.noreply.github.com"
+          git add src/roles.ts
+          if git diff --cached --quiet; then
+            echo "no role changes"
+          else
+            git commit -m "chore: monthly roles refresh incl. API drip $(date -u +%F)"
+            git push origin redesign
+          fi
