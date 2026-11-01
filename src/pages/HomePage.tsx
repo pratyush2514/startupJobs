@@ -9,7 +9,6 @@ import { LazySection } from "../components/LazySection"
 import {
   ArrowRight,
   ArrowUpRight,
-  Check,
   Compass,
   Pin,
 } from "../components/icons"
@@ -47,11 +46,6 @@ export default function HomePage({
   return (
     <div className="home-page">
       <section className="hero container">
-        <p className="hero-kicker" data-reveal>
-          <Pin size={13} />
-          {plural(companies.length, "startup", "startups")} across{" "}
-          {plural(cities.length, "city", "cities")}
-        </p>
         <h1 data-reveal>
           Explore India’s startups,
           <br />
@@ -59,7 +53,7 @@ export default function HomePage({
         </h1>
         <p className="hero-lede" data-reveal>
           Find a team by neighbourhood, then go straight to its own careers
-          page. Every pin is a real company; every role lives on its own site.
+          page.
         </p>
         <div className="hero-actions" data-reveal>
           <a href="#/map" className="button button-primary">
@@ -69,27 +63,9 @@ export default function HomePage({
             Browse companies
           </a>
         </div>
-        <p className="hero-note" data-reveal>
-          <Check size={13} /> Free to explore. No account or card needed.
-        </p>
       </section>
 
       <section className="atlas container" aria-label="Map preview" data-reveal>
-        <div className="atlas-head">
-          <div className="atlas-title">
-            <span className="atlas-mark" aria-hidden="true">
-              <Compass size={15} />
-            </span>
-            <span>
-              <strong>The startup atlas</strong>
-              <small>
-                {plural(cityCompanies.length, "company", "companies")} in{" "}
-                {city.name}
-              </small>
-            </span>
-          </div>
-        </div>
-
         <div className="city-switcher" role="group" aria-label="Choose a city">
           {cities.map((item) => (
             <button
