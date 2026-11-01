@@ -1,7 +1,7 @@
 /* Hallmark v2.0.0 · stamp: startup-arena-polish · theme: none (user-directed: match blrstartuparena reference exactly) · genre: modern-minimal */
    /* Critique: monochrome dark-first system, one pill button style, one container, flat surfaces, transform/opacity motion only; every class verified against component markup. */
    /* Waive 54: small kicker labels kept — existing component contract and the reference itself uses small muted labels; sentence case, untracked. */
-   /* Waive 7b: --surface/--pill resolve to #fff in the light theme only; the default dark theme renders #131313/#ededed — dual-theme tokens, not literals. */
+   /* Waive 7b: --surface/--pill resolve to #fff/#161616 in the light theme only; the default dark theme renders #161616/#dadada — dual-theme tokens, not literals. */
    /* Waive 24b: 6/7/10px optical values kept for pill rhythm and icon gaps; spacing stays on a consistent 2px rhythm per component. */
 
 @import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;450;500;550;600;650;700&display=swap');
@@ -25,9 +25,10 @@
   --text: #f4f4f3;
   --muted: #f4f4f399;
   --faint: #f4f4f373;
-  --pill: #ababab;
+  --pill: #dadada;
   --pill-ink: #0c0c0c;
-  --pill-hover: #c6c6c6;
+  --pill-hover: #e8e8e8;
+  --pill-active: #ababab;
   --pill-dark: #1f1f1f;
   --pill-dark-line: #f4f4f31a;
   --pill-dark-hover: #2a2a2a;
@@ -53,10 +54,11 @@
   --line-strong: #00000026;
   --text: #141414;
   --muted: #6f6f6f;
-  --faint: #9a9a9a;
+  --faint: #767676;
   --pill: #161616;
   --pill-ink: #ffffff;
   --pill-hover: #000000;
+  --pill-active: #000000;
   --pill-dark: #161616;
   --pill-dark-line: #161616;
   --pill-dark-hover: #000000;
@@ -124,6 +126,7 @@ kbd {
 .button:active { scale: .97; }
 .button-primary { background: var(--pill); color: var(--pill-ink); }
 .button-primary:hover { background: var(--pill-hover); }
+.button-primary:active { background: var(--pill-active); }
 .button-dark { background: var(--pill-dark); border-color: var(--pill-dark-line); color: var(--pill-dark-ink); }
 .button-dark:hover { background: var(--pill-dark-hover); border-color: var(--pill-dark-hover); }
 .button-secondary {
@@ -178,9 +181,7 @@ kbd {
 .site-header {
   position: sticky; top: 0; z-index: 1000;
   border-bottom: 1px solid var(--line);
-  background: color-mix(in srgb, var(--bg) 82%, transparent);
-  backdrop-filter: blur(14px) saturate(1.2);
-  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+  background: var(--bg);
 }
 .header-inner {
   display: flex; align-items: center; gap: 28px;
