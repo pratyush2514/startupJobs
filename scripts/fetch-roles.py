@@ -108,6 +108,78 @@ KEKA_PORTALS = {
     ("bacancy", "24b25cc8-8f4c-48f1-905a-60b46a99c09c"): ["ahmedabad-bacancy"],
 }
 
+# Workday: (tenant, wd_number, site) -> our company ids.
+# Discovered from apply URLs like {tenant}.wd{N}.myworkdayjobs.com.
+# Public JSON: POST https://{tenant}.wd{N}.myworkdayjobs.com/wday/cxs/{tenant}/{site}/jobs
+WORKDAY_BOARDS = {
+    ("postman", "108", "careers"): ["bengaluru-postman"],
+}
+
+
+def fetch_workday(tenant, wdnum, site):
+    """Yield jobPostings dicts from a Workday board (paged).
+
+    Uses curl via subprocess: Workday 302-redirects urllib's POST into a
+    broken GET (HTTP 400); curl handles it cleanly. Public JSON, no key.
+    """
+    import json as _json
+    import subprocess
+
+    base = "https://%s.wd%s.myworkdayjobs.com" % (tenant, wdnum)
+    url = "%s/wday/cxs/%s/%s/jobs" % (base, tenant, site)
+    # Workday 400s when limit > 20; paginate instead.
+    limit, offset = 20, 0
+    seen_total = None
+    ua = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+          "(KHTML, like Gecko) Chrome/126.0 Safari/537.36")
+    while True:
+        body = _json.dumps(
+            {"appliedFacets": {}, "limit": limit, "offset": offset,
+             "searchText": ""}
+        )
+        proc = subprocess.run(
+            ["curl", "-s", "--max-time", "25", "-X", "POST", "-A", ua,
+             "-H", "Content-Type: application/json",
+             "-d", body, url],
+            capture_output=True, text=True, timeout=40,
+        )
+        if proc.returncode != 0 or not proc.stdout.strip().startswith("{"):
+            raise RuntimeError("workday %s: bad response" % tenant)
+        data = _json.loads(proc.stdout)
+        postings = data.get("jobPostings") or []
+        if seen_total is None:
+            seen_total = data.get("total") or 0
+        for p in postings:
+            yield p
+        offset += len(postings)
+        if offset >= seen_total or not postings:
+            break
+
+
+def workday_role(job, base_url, cid):
+    title = (job.get("title") or "").strip()
+    if not title:
+        return None
+    ext = job.get("externalPath") or ""
+    apply_url = (base_url + ext) if ext.startswith("/") else (ext or None)
+    loc = (job.get("locationsText") or "").strip() or None
+    posted_on = job.get("postedOn")  # e.g. "30+ Days Ago"
+    bullets = job.get("bulletFields") or []
+    team = bullets[0] if bullets else None
+    rid = "wd-%s-%s" % (cid, abs(hash((title, loc or "", ext))) % 10**10)
+    return {
+        "id": rid,
+        "companyId": cid,
+        "title": title,
+        "team": team,
+        "level": None,
+        "location": loc,
+        "city": infer_city(loc, cid.split("-")[0]) if loc else None,
+        "workMode": None,
+        "postedAt": None,
+        "applyUrl": apply_url,
+    }
+
 CITY_HINTS = {
     "bengaluru": ["bengaluru", "bangalore"],
     "delhi": ["delhi", "gurugram", "gurgaon", "noida"],
@@ -803,6 +875,7 @@ def run_rapidapi(api_key, roles, per_company, only=None):
     covered_ids |= {cid for ids in KEKA_PORTALS.values() for cid in ids}
     covered_ids |= {cid for ids in KULA_BOARDS.values() for cid in ids}
     covered_ids |= set(SWIGGY_IDS)
+    covered_ids |= {cid for ids in WORKDAY_BOARDS.values() for cid in ids}
     covered_ids |= {cid for ids in TURBOHIRE_TENANTS.values() for cid in ids}
     covered_ids |= set(UPSTOX_IDS + URBANCOMPANY_IDS + ZERODHA_IDS)
     by_name = {}
@@ -974,6 +1047,21 @@ def main():
             for cid in company_ids:
                 role = kula_role(job, company, cid, id_to_slug)
                 if role:
+                    roles.append(role)
+                    per_company[cid] = per_company.get(cid, 0) + 1
+    for (tenant, wdnum, site), company_ids in WORKDAY_BOARDS.items():
+        try:
+            jobs = fetch_workday(tenant, wdnum, site)
+        except Exception as e:
+            print(f"WARN workday {tenant}: {e}")
+            continue
+        base_url = "https://%s.wd%s.myworkdayjobs.com" % (tenant, wdnum)
+        for job in jobs:
+            if not looks_india(job.get("locationsText") or ""):
+                continue
+            for cid in company_ids:
+                role = workday_role(job, base_url, cid)
+                if role and role["title"]:
                     roles.append(role)
                     per_company[cid] = per_company.get(cid, 0) + 1
     for cid in SWIGGY_IDS:
