@@ -1,0 +1,51 @@
+name: Refresh roles (Playwright scrapers, weekly)
+
+# Browser scrapers for companies with no public JSON feed (see
+# scripts/scrape-playwright/companies.py and docs/playwright-plan.md).
+# Runs after the JSON-feed workflow; scrape.py writes per-company JSON to
+# scripts/scrape-playwright/out/, then fetch-roles.py merges everything
+# into src/roles.ts. A company that yields 0 roles keeps its previous
+# file — scrapers never silently wipe data.
+
+on:
+  schedule:
+    - cron: "0 4 * * 0" # Sundays 04:00 UTC, after the JSON feeds
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: redesign
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Playwright + Chromium
+        run: |
+          pip install playwright
+          python -m playwright install chromium --with-deps
+
+      - name: Scrape career pages
+        run: python3 scripts/scrape-playwright/scrape.py
+
+      - name: Merge scraper output into roles.ts
+        run: python3 scripts/scrape-playwright/merge.py
+
+      - name: Commit if changed
+        run: |
+          git config user.name "roles-bot"
+          git config user.email "roles-bot@users.noreply.github.com"
+          git add src/roles.ts scripts/scrape-playwright/out/
+          if git diff --cached --quiet; then
+            echo "no role changes"
+          else
+            git commit -m "chore: weekly playwright scrape + roles refresh $(date -u +%F)"
+            git push origin redesign
+          fi
