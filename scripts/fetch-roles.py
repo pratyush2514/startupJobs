@@ -96,6 +96,11 @@ TURBOHIRE_TENANTS = {
     ("flipkart", "4d757ba0-3d57-448a-b82c-238ed87ac90f"): ["bengaluru-flipkart"],
 }
 
+# Company ids with bespoke public JSON feeds (see fetch_* above).
+UPSTOX_IDS = ["mumbai-upstox"]
+URBANCOMPANY_IDS = ["delhi-urban-company"]
+ZERODHA_IDS = ["bengaluru-zerodha"]
+
 # Keka: (subdomain, portal identifier) -> our company ids.
 # The identifier comes from the careers page's embed script URL:
 #   {sub}.keka.com/careers -> /careers/api/embedjobs/js/{identifier}
@@ -135,6 +140,146 @@ _KULA_BS = chr(92)  # backslash — avoids literal-escaping ambiguity
 
 
 
+
+
+def fetch_upstox():
+    """Upstox's public content API — no key.
+
+    Discovered 2026-11-01: service.upstox.com/content/open/v1/jobs/
+    returns {"success":true,"data":[...]}. Only rows with
+    post_on_careers_page="1" are genuinely open (rest are internal/dummy).
+    location/location_city are Python-stringified lists — literal_eval them.
+    Apply URLs go to Upstox's official Darwinbox board.
+    """
+    import ast as _ast
+
+    url = "https://service.upstox.com/content/open/v1/jobs/"
+    req = urllib.request.Request(url, headers={"User-Agent": "startup-arena/1.0"})
+    with urllib.request.urlopen(req, timeout=25) as res:
+        data = json.load(res)
+    jobs = data.get("data") if isinstance(data, dict) else []
+    out = []
+    for j in jobs or []:
+        if str(j.get("post_on_careers_page")) != "1":
+            continue
+        if (j.get("location_country") or "") != "India":
+            continue
+        try:
+            cities = _ast.literal_eval(j.get("location_city") or "[]")
+        except (ValueError, SyntaxError):
+            cities = []
+        try:
+            locs = _ast.literal_eval(j.get("location") or "[]")
+        except (ValueError, SyntaxError):
+            locs = []
+        j = dict(j)
+        j["_cities"] = [c for c in cities if isinstance(c, str)]
+        j["_locs"] = [x for x in locs if isinstance(x, str)]
+        out.append(j)
+    return out
+
+
+def upstox_role(job, cid):
+    city = (job.get("_cities") or [""])[0]
+    loc = (job.get("_locs") or [""])[0] or city
+    jid = job.get("job_id") or ""
+    exp_f, exp_t = job.get("experience_from"), job.get("experience_to")
+    level = None
+    if exp_f is not None or exp_t is not None:
+        level = f"{exp_f or '?'}-{exp_t or '?'} yrs"
+    return {
+        "id": f"upstox-{cid}-{jid}",
+        "companyId": cid,
+        "title": clean(job.get("job_title")),
+        "team": clean(job.get("department")),
+        "level": level,
+        "location": clean(loc),
+        "city": infer_city(loc or city, cid.split("-")[0]),
+        "workMode": "remote" if str(job.get("is_remote")) == "1" else "onsite",
+        "postedAt": (job.get("job_updated_timestamp") or "")[:10] or None,
+        "applyUrl": (
+            f"https://upstox.darwinbox.in/ms/candidatev2/main/careers"
+            f"/jobDetails/{jid}?from=all" if jid else None
+        ),
+    }
+
+
+def fetch_urbancompany():
+    """Urban Company's public gateway API — no key.
+
+    Discovered 2026-11-01: POST dev.urbanclap.com/api/v2/platform-gateway/getAllJobs
+    with {} body. Returns the job list; apply_url points at Urban Company's
+    own TurboHire board.
+    """
+    import subprocess
+
+    # NOTE: urllib intermittently truncates this response; curl is reliable.
+    out = subprocess.run(
+        ["curl", "-s", "--max-time", "25", "-A", "startup-arena/1.0",
+         "-X", "POST", "-H", "Content-Type: application/json",
+         "-d", "{}",
+         "https://dev.urbanclap.com/api/v2/platform-gateway/getAllJobs"],
+        capture_output=True, text=True, timeout=40,
+    )
+    data = json.loads(out.stdout)
+    if isinstance(data, dict):
+        for k in ("jobs", "data", "result"):
+            if isinstance(data.get(k), list):
+                return data[k]
+        return []
+    return data if isinstance(data, list) else []
+
+
+def urbancompany_role(job, cid):
+    cities = job.get("location_city") or []
+    locs = job.get("location") or []
+    city = cities[0] if cities else ""
+    loc = locs[0] if locs else city
+    return {
+        "id": f"uc-{cid}-{job.get('job_id')}",
+        "companyId": cid,
+        "title": clean(job.get("job_title")),
+        "team": clean(job.get("parent_department")),
+        "level": None,
+        "location": clean(loc),
+        "city": infer_city(loc or city, cid.split("-")[0]),
+        "workMode": None,
+        "postedAt": None,
+        "applyUrl": job.get("apply_url"),
+    }
+
+
+def fetch_zerodha():
+    """Zerodha's public jobs API — no key.
+
+    Discovered 2026-11-01: careers.zerodha.com is a Vite SPA fetching
+    /api/jobs -> {"count":N,"data":[...],"success":true}.
+    Currently 0 open roles; wired so postings flow automatically.
+    """
+    url = "https://careers.zerodha.com/api/jobs"
+    req = urllib.request.Request(url, headers={"User-Agent": "startup-arena/1.0"})
+    with urllib.request.urlopen(req, timeout=25) as res:
+        data = json.load(res)
+    jobs = data.get("data") if isinstance(data, dict) else []
+    return jobs if isinstance(jobs, list) else []
+
+
+def zerodha_role(job, cid):
+    # Shape TBD — endpoint currently returns []. Best-effort mapping;
+    # refine when Zerodha posts roles.
+    jid = job.get("id") or job.get("job_id") or ""
+    return {
+        "id": f"zerodha-{cid}-{jid}",
+        "companyId": cid,
+        "title": clean(job.get("title") or job.get("job_title")),
+        "team": clean(job.get("department") or job.get("team")),
+        "level": None,
+        "location": clean(job.get("location") or ""),
+        "city": infer_city(job.get("location") or "", cid.split("-")[0]),
+        "workMode": None,
+        "postedAt": (job.get("created_at") or job.get("published_at") or "")[:10] or None,
+        "applyUrl": f"https://careers.zerodha.com/jobs/{jid}" if jid else "https://careers.zerodha.com",
+    }
 
 def fetch_turbohire(subdomain, org_guid):
     """TurboHire ATS public API — no key, but needs a fresh anon token.
@@ -659,6 +804,7 @@ def run_rapidapi(api_key, roles, per_company, only=None):
     covered_ids |= {cid for ids in KULA_BOARDS.values() for cid in ids}
     covered_ids |= set(SWIGGY_IDS)
     covered_ids |= {cid for ids in TURBOHIRE_TENANTS.values() for cid in ids}
+    covered_ids |= set(UPSTOX_IDS + URBANCOMPANY_IDS + ZERODHA_IDS)
     by_name = {}
     for cid, name in companies:
         if cid in covered_ids:
@@ -850,6 +996,22 @@ def main():
         for job in jobs:
             for cid in company_ids:
                 role = turbohire_role(job, subdomain, cid)
+                if role and role["title"] and role["applyUrl"]:
+                    roles.append(role)
+                    per_company[cid] = per_company.get(cid, 0) + 1
+    for _label, _ids, _fetch, _mk in [
+        ("upstox", UPSTOX_IDS, fetch_upstox, upstox_role),
+        ("urbancompany", URBANCOMPANY_IDS, fetch_urbancompany, urbancompany_role),
+        ("zerodha", ZERODHA_IDS, fetch_zerodha, zerodha_role),
+    ]:
+        try:
+            jobs = _fetch()
+        except Exception as e:
+            print(f"WARN {_label}: {e}")
+            continue
+        for job in jobs:
+            for cid in _ids:
+                role = _mk(job, cid)
                 if role and role["title"] and role["applyUrl"]:
                     roles.append(role)
                     per_company[cid] = per_company.get(cid, 0) + 1
