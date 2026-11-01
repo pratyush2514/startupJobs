@@ -65,7 +65,7 @@ export default function HomePage({
           <a href="#/map" className="button button-primary">
             Open the map <ArrowUpRight size={15} />
           </a>
-          <a href="#/companies" className="button button-secondary">
+          <a href="#/companies" className="button button-dark">
             Browse companies
           </a>
         </div>

@@ -64,7 +64,7 @@ export function Header({
           </button>
           <a
             href="#/map"
-            className="button button-primary header-cta"
+            className="button button-dark header-cta"
             onPointerEnter={() => preloadPage("map")}
             onFocus={() => preloadPage("map")}
           >

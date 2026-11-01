@@ -93,11 +93,13 @@ export default function MapView({
     const instance = L.map(container.current, {
       zoomControl: false,
       attributionControl: true,
+      // The preview map stays fully interactive (drag / touch / double-click),
+      // but never hijacks the page's scroll wheel.
       scrollWheelZoom: preview ? false : true,
-      dragging: !preview,
-      touchZoom: !preview,
-      doubleClickZoom: !preview,
-      boxZoom: !preview,
+      dragging: true,
+      touchZoom: true,
+      doubleClickZoom: true,
+      boxZoom: true,
       keyboard: true,
       zoomSnap: 0.5,
       zoomDelta: 0.5,
@@ -365,9 +367,8 @@ export default function MapView({
         </div>
       )}
 
-      {!preview && ready && (
-        <>
-          <div className="map-controls" aria-label="Map controls">
+      {ready && (
+        <div className="map-controls" aria-label="Map controls">
             <button
               type="button"
               onClick={() => map.current?.zoomIn(0.5)}
@@ -393,7 +394,6 @@ export default function MapView({
               <Fit size={16} />
             </button>
           </div>
-        </>
       )}
 
       {!preview && status !== "ready" && (
