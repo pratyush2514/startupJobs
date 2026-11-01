@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
-"""Fetch real open roles from companies' public Greenhouse boards + RapidAPI.
+"""Fetch real open roles from companies' public ATS boards + RapidAPI.
 
-Two sources, merged into one feed:
-  1. Public Greenhouse boards (no key) — 6 companies, unlimited.
-  2. RapidAPI "Company Career Sites Jobs API" (needs key) — every other
-     company, pulled from their own ATS career sites (Greenhouse, Lever,
-     Ashby, Workday, ...). ~1 call per company per refresh.
+Sources, merged into one feed (all free and keyless except the last):
+  1. Public Greenhouse boards — 7 companies, unlimited.
+  2. Public Lever boards (api.lever.co) — 3 companies, unlimited.
+  3. Public SmartRecruiters API — Freshworks (2 pins), unlimited.
+  4. RapidAPI "Company Career Sites Jobs API" (needs key) — every other
+     company, pulled from their own ATS career sites. ~1 call per company
+     per refresh; the free Basic tier is ~50 requests/month, so the direct
+     feeds above exist to keep the API bill inside that quota.
 
 Only India-based roles are kept. Writes src/roles.ts (generated, committed).
 
@@ -16,6 +19,9 @@ Without the key, only the Greenhouse source runs.
 
 Probe the raw API shape for one company:
     RAPIDAPI_KEY=xxx python3 scripts/fetch-roles.py --probe Razorpay
+
+Refresh only some companies (after a rate-limit pause, for example):
+    RAPIDAPI_KEY=xxx python3 scripts/fetch-roles.py --only PhonePe,Swiggy,Zepto
 """
 import json
 import os
@@ -38,6 +44,20 @@ BOARDS = {
     "inmobi": ["bengaluru-inmobi"],
     "pubmatic": ["pune-pubmatic"],
     "zenoti": ["hyderabad-zenoti"],
+    # board slug discovered via the RapidAPI Career Sites feed
+    "razorpaysoftwareprivatelimited": ["bengaluru-razorpay"],
+}
+
+# Lever board slug -> our company ids (public JSON, no key)
+LEVER_BOARDS = {
+    "cred": ["bengaluru-cred"],
+    "meesho": ["bengaluru-meesho"],
+    "mindtickle": ["pune-mindtickle"],
+}
+
+# SmartRecruiters company name -> our company ids (public JSON, no key)
+SMARTRECRUITERS = {
+    "Freshworks": ["bengaluru-freshworks", "chennai-freshworks"],
 }
 
 CITY_HINTS = {
@@ -57,6 +77,81 @@ def fetch_board(token):
     req = urllib.request.Request(url, headers={"User-Agent": "startup-arena/1.0"})
     with urllib.request.urlopen(req, timeout=25) as res:
         return json.load(res).get("jobs", [])
+
+
+def fetch_lever(slug):
+    """Public Lever postings API — returns a JSON array, no key needed."""
+    url = f"https://api.lever.co/v0/postings/{slug}?mode=json"
+    req = urllib.request.Request(url, headers={"User-Agent": "startup-arena/1.0"})
+    with urllib.request.urlopen(req, timeout=25) as res:
+        data = json.load(res)
+    return data if isinstance(data, list) else []
+
+
+def fetch_smartrecruiters(company):
+    """Public SmartRecruiters postings API — paged, no key needed."""
+    postings = []
+    offset = 0
+    while True:
+        url = (
+            f"https://api.smartrecruiters.com/v1/companies/{company}"
+            f"/postings?limit=100&offset={offset}"
+        )
+        req = urllib.request.Request(
+            url, headers={"User-Agent": "startup-arena/1.0"}
+        )
+        with urllib.request.urlopen(req, timeout=25) as res:
+            data = json.load(res)
+        batch = data.get("content") or []
+        postings.extend(batch)
+        if len(postings) >= (data.get("totalFound") or 0) or not batch:
+            break
+        offset += len(batch)
+    return postings
+
+
+def lever_role(posting, cid):
+    cats = posting.get("categories") or {}
+    loc = cats.get("location") or ""
+    created = posting.get("createdAt")
+    posted = None
+    if created:
+        try:
+            posted = datetime.fromtimestamp(created / 1000, tz=timezone.utc).date().isoformat()
+        except (ValueError, OSError):
+            pass
+    return {
+        "id": f"lever-{cid}-{posting.get('id')}",
+        "companyId": cid,
+        "title": clean(posting.get("text")),
+        "team": clean(cats.get("team")) or clean(cats.get("department")),
+        "level": None,
+        "location": clean(loc),
+        "city": infer_city(loc, cid.split("-")[0]),
+        "workMode": "remote"
+        if "remote" in loc.lower()
+        else ("hybrid" if "hybrid" in loc.lower() else None),
+        "postedAt": posted,
+        "applyUrl": posting.get("hostedUrl"),
+    }
+
+
+def smartrecruiters_role(posting, company, cid):
+    loc = posting.get("location") or {}
+    country = loc.get("country") or ""
+    city = loc.get("city") or ""
+    return {
+        "id": f"sr-{cid}-{posting.get('id')}",
+        "companyId": cid,
+        "title": clean(posting.get("name")),
+        "team": clean((posting.get("function") or "")),
+        "level": None,
+        "location": clean(f"{city}, {country}".strip(", ")),
+        "city": infer_city(f"{city} {country}", cid.split("-")[0]),
+        "workMode": None,
+        "postedAt": (posting.get("releasedDate") or "")[:10] or None,
+        "applyUrl": f"https://jobs.smartrecruiters.com/{company}/{posting.get('id')}",
+    }
 
 
 def meta_value(job, *names):
@@ -88,37 +183,47 @@ def infer_mode(job, location):
     return None
 
 
-def clean(s):
-    return re.sub(r"\s+", " ", (s or "").strip()) or None
+INDIAN_STATES = {
+    "andhra pradesh", "arunachal pradesh", "assam", "bihar", "chhattisgarh",
+    "delhi", "goa", "gujarat", "haryana", "himachal pradesh", "jharkhand",
+    "karnataka", "kerala", "madhya pradesh", "maharashtra", "manipur",
+    "meghalaya", "mizoram", "nagaland", "odisha", "orissa", "punjab",
+    "rajasthan", "sikkim", "tamil nadu", "telangana", "tripura",
+    "uttar pradesh", "uttarakhand", "west bengal", "jammu", "kashmir",
+    "ladakh", "puducherry", "pondicherry", "chandigarh",
+}
+
+_CITY_HINT_WORDS = {h for hints in CITY_HINTS.values() for h in hints}
 
 
-def join_list(v):
-    if isinstance(v, list):
-        v = ", ".join(str(x) for x in v if x)
-    return clean(str(v)) if v else None
+def looks_india(location_text):
+    """True when a location string refers to India.
 
-
-def first(d, *keys):
-    for k in keys:
-        if d.get(k):
-            return d[k]
-    return None
+    Some boards give 'City, State, India', others only 'City, State' or a
+    bare city — so match Indian cities and states, not just the word India.
+    """
+    text = (location_text or "").lower()
+    if "india" in text:
+        return True
+    return any(w in text for w in _CITY_HINT_WORDS) or any(
+        s in text for s in INDIAN_STATES
+    )
 
 
 def normalize_rapidapi_job(j, source_tag):
-    """Map a RapidAPI job object onto our Role fields (minus companyId/city).
+    """Map a Company Career Sites Jobs API job onto our Role fields.
 
-    Field names are best-effort across plausible shapes; --probe dumps the
-    real shape so this can be tightened after the first live run.
+    Real shape (verified 2026-11-01): data.jobs[] with id, title, company,
+    applyUrl, category, subcategory, experienceLevel, workMode, location,
+    city, country, postedAt (YYYY-MM-DD); pagination via data.nextCursor.
     """
-    title = clean(first(j, "title", "jobTitle", "name"))
-    location = clean(first(j, "location", "jobLocation"))
-    city = clean(first(j, "city"))
-    team = join_list(first(j, "department", "team", "category"))
-    if not team:
-        team = join_list(first(j, "subcategories", "subcategory"))
-    level = join_list(first(j, "experienceLevel", "level", "seniority"))
-    mode = (clean(first(j, "workMode", "workplace", "workplaceType")) or "").lower()
+    title = clean(j.get("title"))
+    team = clean(j.get("category"))
+    sub = clean(j.get("subcategory"))
+    if sub and sub != team:
+        team = f"{team} · {sub}" if team else sub
+    level = clean(j.get("experienceLevel"))
+    mode = (clean(j.get("workMode")) or "").lower()
     if "remote" in mode:
         work_mode = "remote"
     elif "hybrid" in mode:
@@ -126,30 +231,24 @@ def normalize_rapidapi_job(j, source_tag):
     elif "onsite" in mode or "on-site" in mode or "office" in mode:
         work_mode = "onsite"
     else:
-        work_mode = None
-    posted = first(j, "postedAt", "datePosted", "publishedAt", "createdAt", "date")
-    if posted is not None and not isinstance(posted, str):
-        posted = str(posted)
-    apply = clean(first(j, "applyUrl", "apply_url", "url", "jobUrl", "link"))
-    jid = first(j, "id", "jobId")
-    if not jid:
-        jid = re.sub(r"\W+", "-", (title or "job").lower())[:40]
+        work_mode = "remote" if j.get("isRemote") else None
+    posted = clean(j.get("postedAt"))
     return {
-        "job_key": str(jid),
+        "job_key": str(j.get("id") or re.sub(r"\W+", "-", (title or "job").lower())[:40]),
         "title": title,
         "team": team,
         "level": level,
-        "location": location or city,
-        "city_hint": city or location,
+        "location": clean(j.get("location")) or clean(j.get("city")),
+        "city_hint": clean(j.get("city")) or clean(j.get("location")),
         "workMode": work_mode,
         "postedAt": posted,
-        "applyUrl": apply,
+        "applyUrl": clean(j.get("applyUrl")),
         "source": source_tag,
     }
 
 
 def fetch_rapidapi_company(name, api_key):
-    """All India jobs for one company name, following cursor pages."""
+    """All India jobs for one company name, following nextCursor pages."""
     jobs = []
     cursor = None
     calls = 0
@@ -162,6 +261,11 @@ def fetch_rapidapi_company(name, api_key):
             headers={
                 "x-rapidapi-host": RAPIDAPI_HOST,
                 "x-rapidapi-key": api_key,
+                # the API sits behind Cloudflare: Python-urllib's default
+                # UA gets a 1010 block, a browser UA passes through.
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                "AppleWebKit/537.36 (KHTML, like Gecko) "
+                "Chrome/126.0 Safari/537.36",
             },
         )
         calls += 1
@@ -176,15 +280,12 @@ def fetch_rapidapi_company(name, api_key):
                     "(subscribe to 'Company Career Sites Jobs API' on RapidAPI first)"
                 )
             raise
-        if isinstance(data, dict) and data.get("message") and not (
-            data.get("jobs") or data.get("data")
-        ):
+        payload = data.get("data") or {}
+        if isinstance(data, dict) and data.get("message") and not payload.get("jobs"):
             raise RuntimeError(f"API error: {data['message']}")
-        batch = data.get("jobs") or data.get("data") or []
+        batch = payload.get("jobs") or []
         jobs.extend(batch)
-        cursor = (
-            data.get("cursor") or data.get("nextCursor") or data.get("next_cursor")
-        )
+        cursor = payload.get("nextCursor")
         if not cursor or not batch:
             break
     return jobs, calls
@@ -209,15 +310,20 @@ def load_companies():
     return [(i, n) for i, n in pairs if "-" in i]
 
 
-def run_rapidapi(api_key, roles, per_company):
+def run_rapidapi(api_key, roles, per_company, only=None):
     """Pull India roles for every company not on a direct Greenhouse feed."""
     companies = load_companies()
     covered_ids = {cid for ids in BOARDS.values() for cid in ids}
+    covered_ids |= {cid for ids in LEVER_BOARDS.values() for cid in ids}
+    covered_ids |= {cid for ids in SMARTRECRUITERS.values() for cid in ids}
     by_name = {}
     for cid, name in companies:
         if cid in covered_ids:
             continue
         by_name.setdefault(name, []).append(cid)
+    if only:
+        wanted = {w.lower() for w in only}
+        by_name = {n: c for n, c in by_name.items() if n.lower() in wanted}
     total_calls = 0
     for name, cids in sorted(by_name.items()):
         try:
@@ -269,7 +375,7 @@ def main():
             continue
         for job in jobs:
             loc = (job.get("location") or {}).get("name", "")
-            if "india" not in loc.lower():
+            if not looks_india(loc):
                 continue
             for cid in company_ids:
                 company_city = cid.split("-")[0]
@@ -291,9 +397,55 @@ def main():
                     }
                 )
                 per_company[cid] = per_company.get(cid, 0) + 1
+    for slug, company_ids in LEVER_BOARDS.items():
+        try:
+            postings = fetch_lever(slug)
+        except Exception as e:
+            print(f"WARN lever {slug}: {e}")
+            continue
+        for post in postings:
+            loc = ((post.get("categories") or {}).get("location") or "")
+            if not looks_india(loc):
+                continue
+            for cid in company_ids:
+                role = lever_role(post, cid)
+                if role["title"] and role["applyUrl"]:
+                    roles.append(role)
+                    per_company[cid] = per_company.get(cid, 0) + 1
+    for company, company_ids in SMARTRECRUITERS.items():
+        try:
+            postings = fetch_smartrecruiters(company)
+        except Exception as e:
+            print(f"WARN smartrecruiters {company}: {e}")
+            continue
+        for post in postings:
+            loc = post.get("location") or {}
+            country = (loc.get("country") or "").lower()
+            if country != "in" and not looks_india(loc.get("fullLocation") or ""):
+                continue
+            # One board serves both city pins — route each role to the pin
+            # matching its city, once.
+            city = infer_city(
+                f"{loc.get('city') or ''} {loc.get('country') or ''}",
+                None,
+            )
+            target = (
+                next((c for c in company_ids if c.startswith(city + "-")), None)
+                if city
+                else None
+            ) or company_ids[0]
+            role = smartrecruiters_role(post, company, target)
+            if role["title"]:
+                role["city"] = city or target.split("-")[0]
+                roles.append(role)
+                per_company[target] = per_company.get(target, 0) + 1
     api_key = os.environ.get("RAPIDAPI_KEY")
     if api_key:
-        run_rapidapi(api_key, roles, per_company)
+        only = None
+        for i, a in enumerate(sys.argv):
+            if a == "--only" and i + 1 < len(sys.argv):
+                only = sys.argv[i + 1].split(",")
+        run_rapidapi(api_key, roles, per_company, only)
     else:
         print("RAPIDAPI_KEY not set — Greenhouse source only.")
 
