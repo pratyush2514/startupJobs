@@ -16,6 +16,7 @@ import HomePage from "./pages/HomePage"
 const MapPage = lazy(() => import("./pages/MapPage"))
 const CitiesPage = lazy(() => import("./pages/CitiesPage"))
 const CompaniesPage = lazy(() => import("./pages/CompaniesPage"))
+const JobsPage = lazy(() => import("./pages/JobsPage"))
 const PricingPage = lazy(() => import("./pages/PricingPage"))
 const AboutPage = lazy(() => import("./pages/AboutPage"))
 const FaqPage = lazy(() => import("./pages/FaqPage"))
@@ -45,13 +46,6 @@ export default function App() {
   const isKnown = knownPages.has(page)
 
   useEffect(() => {
-    // The jobs route is reserved for the live roles feed (Phase 2). Until
-    // real roles exist, it redirects to the verified company directory
-    // instead of showing mock listings.
-    if (page === "jobs") {
-      window.location.hash = "#/companies"
-      return
-    }
     setMobileNav(false)
     setSelected(null)
     if (lastPage.current !== page) {
@@ -131,9 +125,11 @@ export default function App() {
 
             {page === "cities" && <CitiesPage />}
 
-            {(page === "companies" || page === "jobs") && (
+            {(page === "companies") && (
               <CompaniesPage initialCity={cityParam} onSelect={openCompany} />
             )}
+
+            {page === "jobs" && <JobsPage initialCity={cityParam} />}
 
             {page === "pricing" && <PricingPage />}
             {page === "about" && <AboutPage />}

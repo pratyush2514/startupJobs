@@ -25,6 +25,12 @@ const links = [
     hint: "Browse the directory",
   },
   {
+    page: "jobs",
+    href: "#/jobs",
+    label: "Jobs",
+    hint: "Open roles, straight from company boards",
+  },
+  {
     page: "about",
     href: "#/about",
     label: "How it works",

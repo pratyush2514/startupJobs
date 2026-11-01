@@ -6,6 +6,7 @@ const navigation = [
   { page: "map", href: "#/map", label: "Map" },
   { page: "cities", href: "#/cities", label: "Cities" },
   { page: "companies", href: "#/companies", label: "Companies" },
+  { page: "jobs", href: "#/jobs", label: "Jobs" },
   { page: "about", href: "#/about", label: "How it works" },
   { page: "pricing", href: "#/pricing", label: "Pricing" },
 ]
@@ -25,7 +26,7 @@ export function Header({
   onOpenMenu: () => void
   slim?: boolean
 }) {
-  const activePage = page === "jobs" ? "companies" : page
+  const activePage = page
   return (
     <header
       className={`site-header${scrolled ? " is-scrolled" : ""}${

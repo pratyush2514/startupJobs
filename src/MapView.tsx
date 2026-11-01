@@ -3,6 +3,7 @@ import L from "leaflet"
 import "leaflet/dist/leaflet.css"
 import { type City, type Company } from "./data"
 import { monogram, readableOn } from "./lib/utils"
+import { rolesForCompany } from "./lib/roles"
 import { useOnline, useSlowConnection } from "./lib/hooks"
 import { SchematicMap } from "./components/SchematicMap"
 import { Fit, Minus, Pin, Plus, Refresh, WifiOff } from "./components/icons"
@@ -284,6 +285,24 @@ export default function MapView({
       const area = document.createElement("span")
       area.textContent = `${place} · ${company.category}`
       tooltip.append(name, area)
+
+      const companyRoles = rolesForCompany(company.id)
+      if (companyRoles.length > 0) {
+        const rolesHead = document.createElement("span")
+        rolesHead.className = "map-tooltip-roles-head"
+        rolesHead.textContent = `${companyRoles.length} open role${companyRoles.length === 1 ? "" : "s"}`
+        tooltip.append(rolesHead)
+        for (const role of companyRoles.slice(0, 2)) {
+          const row = document.createElement("span")
+          row.className = "map-tooltip-role"
+          row.textContent = role.title
+          tooltip.append(row)
+        }
+        const hint = document.createElement("span")
+        hint.className = "map-tooltip-hint"
+        hint.textContent = "Click the pin for all roles"
+        tooltip.append(hint)
+      }
 
       marker.bindTooltip(tooltip, {
         direction: "top",

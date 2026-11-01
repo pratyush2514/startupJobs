@@ -870,7 +870,7 @@ export const faqs = [
   ],
   [
     "Are these live job listings?",
-    "No. Startup Arena is a curated directory of verified companies, not a job board. Every company links to its official careers page, and that is where open roles live — we never invent listings. Office locations are approximate localities, not exact buildings.",
+    "Some are. Open roles shown on the site are pulled directly from each company's own job board and link back to the original posting — we never invent listings or take applications. Companies without a live feed link straight to their official careers page for the complete list. Office locations are approximate localities, not exact buildings.",
   ],
   [
     "Do I need an account to explore?",

@@ -3,6 +3,7 @@ import { cities, type Company } from "../data"
 import { CompanyLogo } from "./CompanyLogo"
 import { ArrowUpRight, Close, ExternalLink, Info, Pin } from "./icons"
 import { useBodyLock } from "../lib/hooks"
+import { postedAgo, roleMeta, rolesForCompany } from "../lib/roles"
 
 function hostname(url: string) {
   try {
@@ -23,6 +24,7 @@ export function CompanyDialog({
   const closeRef = useRef(onClose)
   closeRef.current = onClose
   const city = cities.find((item) => item.id === company.city) ?? cities[0]
+  const companyRoles = rolesForCompany(company.id)
   useBodyLock(true)
 
   useEffect(() => {
@@ -68,17 +70,58 @@ export function CompanyDialog({
         </p>
         <div className="company-dialog-tags">
           <span>{company.category}</span>
+          {companyRoles.length > 0 && (
+            <span className="tag-accent">
+              {companyRoles.length} open role{companyRoles.length === 1 ? "" : "s"}
+            </span>
+          )}
         </div>
 
-        <div className="company-note">
-          <Info size={15} />
-          <p>
-            Verified company profile. The pin marks the office locality, not
-            the exact building. Open roles live on {company.name}&rsquo;s
-            official careers page — we link you straight there and never take
-            applications.
-          </p>
-        </div>
+        {companyRoles.length > 0 ? (
+          <div className="company-roles">
+            <h3 className="company-dialog-subhead">
+              Open roles <small>from {company.name}&rsquo;s own job board</small>
+            </h3>
+            <ul>
+              {companyRoles.map((role) => {
+                const meta = roleMeta(role)
+                const ago = postedAgo(role.postedAt)
+                return (
+                  <li key={role.id}>
+                    <a
+                      href={role.applyUrl}
+                      target="_blank"
+                      rel="noreferrer noopener"
+                      className="role-row"
+                    >
+                      <span className="role-row-main">
+                        <strong>{role.title}</strong>
+                        {(meta || ago) && (
+                          <small>
+                            {meta}
+                            {meta && ago ? " · " : ""}
+                            {ago}
+                          </small>
+                        )}
+                      </span>
+                      <ArrowUpRight size={15} className="role-row-arrow" />
+                    </a>
+                  </li>
+                )
+              })}
+            </ul>
+          </div>
+        ) : (
+          <div className="company-note">
+            <Info size={15} />
+            <p>
+              Verified company profile. The pin marks the office locality, not
+              the exact building. Open roles live on {company.name}&rsquo;s
+              official careers page — we link you straight there and never
+              take applications.
+            </p>
+          </div>
+        )}
 
         <a
           className="button button-primary company-dialog-cta"

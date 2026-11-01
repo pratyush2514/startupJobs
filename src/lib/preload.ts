@@ -7,8 +7,9 @@ export function preloadPage(page: string) {
     case "cities":
       return import("../pages/CitiesPage")
     case "companies":
-    case "jobs":
       return import("../pages/CompaniesPage")
+    case "jobs":
+      return import("../pages/JobsPage")
     case "pricing":
       return import("../pages/PricingPage")
     case "about":

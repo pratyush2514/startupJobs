@@ -1,6 +1,7 @@
 import { type Company } from "../data"
 import { CompanyLogo } from "./CompanyLogo"
 import { ArrowRight, ArrowUpRight, Pin } from "./icons"
+import { roleCountForCompany } from "../lib/roles"
 
 export function DirectoryCard({
   company,
@@ -9,6 +10,7 @@ export function DirectoryCard({
   company: Company
   onSelect: (company: Company) => void
 }) {
+  const openRoles = roleCountForCompany(company.id)
   return (
     <article className="directory-card">
       <button
@@ -33,6 +35,11 @@ export function DirectoryCard({
         )}
         <span className="directory-tags">
           <span>{company.category}</span>
+          {openRoles > 0 && (
+            <span className="tag-roles">
+              {openRoles} open role{openRoles === 1 ? "" : "s"}
+            </span>
+          )}
         </span>
         <span className="directory-card-foot">
           Explore the company <ArrowRight size={14} />
