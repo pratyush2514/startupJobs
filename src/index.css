@@ -30,6 +30,7 @@
   --pill-hover: #e8e8e8;
   --pill-active: #ababab;
   --pill-dark: #1f1f1f;
+  --pin-logo-bg: #ffffff;
   --pill-dark-line: #f4f4f31a;
   --pill-dark-hover: #2a2a2a;
   --pill-dark-ink: #f4f4f3;
@@ -857,6 +858,9 @@ kbd {
 }
 .map-pin:hover { translate: 0 -4px; }
 .map-pin.is-selected { outline: 2px solid var(--text); outline-offset: 3px; }
+.map-pin.has-logo { background: var(--pin-logo-bg); }
+.map-pin.has-logo .map-pin-body { width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; }
+.map-pin.has-logo .map-pin-body img { width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
 .map-pin-tail {
   position: absolute; bottom: -6px; left: 50%; translate: -50% 0;
   border: 5px solid transparent; border-top-color: var(--surface);

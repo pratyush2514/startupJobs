@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react"
 import L from "leaflet"
 import "leaflet/dist/leaflet.css"
-import { type City, type Company } from "./data"
+import { type City, type Company, companyLogo } from "./data"
 import { monogram, readableOn } from "./lib/utils"
 import { rolesForCompany } from "./lib/roles"
 import { useOnline, useSlowConnection } from "./lib/hooks"
@@ -251,13 +251,27 @@ export default function MapView({
     markerIndex.current.clear()
 
     companies.forEach((company) => {
+      const logo = companyLogo(company)
       const element = document.createElement("div")
-      element.className = "map-pin"
+      element.className = "map-pin" + (logo ? " has-logo" : "")
       element.style.setProperty("--pin", company.color)
       element.style.setProperty("--pin-ink", readableOn(company.color))
       const body = document.createElement("span")
       body.className = "map-pin-body"
-      body.textContent = monogram(company.name)
+      if (logo) {
+        const img = document.createElement("img")
+        img.src = logo
+        img.alt = ""
+        img.loading = "lazy"
+        img.draggable = false
+        img.onerror = () => {
+          element.classList.remove("has-logo")
+          body.replaceChildren(document.createTextNode(monogram(company.name)))
+        }
+        body.append(img)
+      } else {
+        body.textContent = monogram(company.name)
+      }
       const tail = document.createElement("span")
       tail.className = "map-pin-tail"
       element.append(body, tail)
