@@ -5,7 +5,7 @@ name: Refresh roles (Playwright scrapers, weekly)
 # Runs after the JSON-feed workflow; scrape.py writes per-company JSON to
 # scripts/scrape-playwright/out/, then fetch-roles.py merges everything
 # into src/roles.ts. A company that yields 0 roles keeps its previous
-# file — scrapers never silently wipe data.
+# file - scrapers never silently wipe data.
 
 on:
   schedule:
@@ -21,7 +21,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: redesign
+          ref: main
 
       - uses: actions/setup-python@v5
         with:
@@ -35,17 +35,17 @@ jobs:
       - name: Scrape career pages
         run: python3 scripts/scrape-playwright/scrape.py
 
-      - name: Merge scraper output into roles.ts
+      - name: Merge scraped roles
         run: python3 scripts/scrape-playwright/merge.py
 
       - name: Commit if changed
         run: |
           git config user.name "roles-bot"
           git config user.email "roles-bot@users.noreply.github.com"
-          git add src/roles.ts scripts/scrape-playwright/out/
+          git add src/roles.ts
           if git diff --cached --quiet; then
             echo "no role changes"
           else
-            git commit -m "chore: weekly playwright scrape + roles refresh $(date -u +%F)"
-            git push origin redesign
+            git commit -m "chore: weekly playwright scrape $(date -u +%F)"
+            git push origin main
           fi
