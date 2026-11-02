@@ -7,7 +7,7 @@ name: Refresh roles (free feeds, weekly)
 
 on:
   schedule:
-    - cron: "0 2 * * 0" # Sundays 02:00 UTC
+    - cron: "0 */6 * * *" # Sundays 02:00 UTC
   workflow_dispatch:
 
 permissions:
@@ -19,7 +19,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: redesign
+          ref: main
 
       - uses: actions/setup-python@v5
         with:
