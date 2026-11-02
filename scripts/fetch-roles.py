@@ -64,6 +64,16 @@ BOARDS = {
     "zenoti": ["hyderabad-zenoti"],
     # board slug discovered via the RapidAPI Career Sites feed
     "razorpaysoftwareprivatelimited": ["bengaluru-razorpay"],
+    # MNC batch 2026-11-02 — boards discovered via scripts/probe-ats.py,
+    # India-role counts verified before onboarding
+    "databricks": ["bengaluru-databricks"],
+    "mongodb": ["delhi-mongodb"],
+    "stripe": ["bengaluru-stripe"],
+    "gitlab": ["bengaluru-gitlab"],
+    "coinbase": ["hyderabad-coinbase"],
+    "elastic": ["bengaluru-elastic"],
+    "datadog": ["bengaluru-datadog"],
+    "twilio": ["bengaluru-twilio"],
 }
 
 # Lever board slug -> our company ids (public JSON, no key)
