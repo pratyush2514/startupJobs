@@ -804,7 +804,7 @@ kbd {
 .leaflet-control-attribution { font-size: 9px !important; background: color-mix(in srgb, var(--surface) 85%, transparent) !important; color: var(--faint) !important; }
 .leaflet-control-attribution a { color: var(--muted) !important; }
 .schematic-layer { position: absolute; inset: 0; z-index: 2; transition: opacity .5s ease; }
-.schematic-layer.is-hidden { opacity: 0; pointer-events: none; }
+.schematic-layer.is-hidden { opacity: 0; pointer-events: none; visibility: hidden; transition: opacity .5s ease, visibility 0s .5s; }
 .map-city-label {
   position: absolute; top: 12px; right: 12px; z-index: 600;
   display: inline-flex; align-items: center; gap: 7px;

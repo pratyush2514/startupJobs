@@ -295,6 +295,7 @@ export default function MapView({
         img.src = logo
         img.alt = ""
         img.loading = "lazy"
+        img.decoding = "async"
         img.draggable = false
         img.onerror = () => {
           element.classList.remove("has-logo")

@@ -2,6 +2,7 @@ import { Suspense, lazy, useEffect, useRef, useState } from "react"
 import { type City, type Company } from "../data"
 import { SchematicMap } from "./SchematicMap"
 import { preloadMapView } from "../lib/preload"
+import { preloadMarkerCluster } from "../lib/markercluster"
 
 const LazyMapView = lazy(preloadMapView)
 
@@ -28,6 +29,7 @@ export function MapCanvas(props: Props) {
         if (!entries.some((entry) => entry.isIntersecting)) return
         setActive(true)
         void preloadMapView()
+        void preloadMarkerCluster()
         observer.disconnect()
       },
       { rootMargin: "600px 0px" },
