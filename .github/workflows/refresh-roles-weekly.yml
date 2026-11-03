@@ -7,11 +7,7 @@ name: Refresh roles (free feeds, every 6 hours)
 
 on:
   schedule:
-<<<<<<< HEAD
     - cron: "0 */6 * * *" # Sundays 02:00 UTC
-=======
-    - cron: "0 */6 * * *" # every 6 hours
->>>>>>> 5630eaa05d9a263439c07e19a4e69943bb65bbf6
   workflow_dispatch:
 
 permissions:
