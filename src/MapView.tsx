@@ -4,6 +4,7 @@ import "leaflet/dist/leaflet.css"
 import { type City, type Company, companyLogo } from "./data"
 import { monogram, readableOn } from "./lib/utils"
 import { rolesForCompany } from "./lib/roles"
+import { ensureMarkerCluster } from "./lib/markercluster"
 import { useOnline, useSlowConnection } from "./lib/hooks"
 import { SchematicMap } from "./components/SchematicMap"
 import { Fit, Minus, Pin, Plus, Refresh, WifiOff } from "./components/icons"
@@ -113,7 +114,8 @@ export default function MapView({
     instance.attributionControl.setPrefix(false)
     instance.setView([city.lat, city.lng], preview ? 11 : 12, { animate: false })
     map.current = instance
-    markers.current = L.layerGroup().addTo(instance)
+    // The marker layer is created by the companies effect below, once the
+    // (lazily loaded) markercluster plugin is ready.
 
     const frame = window.requestAnimationFrame(() => {
       instance.invalidateSize()
@@ -245,12 +247,42 @@ export default function MapView({
   }, [city.id])
 
   useEffect(() => {
-    const group = markers.current
-    if (!group) return
-    group.clearLayers()
-    markerIndex.current.clear()
+    const instance = map.current
+    if (!instance) return
+    let cancelled = false
+    ;(async () => {
+      await ensureMarkerCluster(L)
+      if (cancelled || map.current !== instance) return
 
-    companies.forEach((company) => {
+      let group = markers.current
+      if (!group) {
+        const cluster = L.markerClusterGroup({
+          maxClusterRadius: 56,
+          showCoverageOnHover: false,
+          zoomToBoundsOnClick: true,
+          spiderfyOnMaxZoom: true,
+          disableClusteringAtZoom: 16,
+          iconCreateFunction: (child: L.MarkerCluster) => {
+            const count = child.getChildCount()
+            const size = count < 10 ? "s" : count < 30 ? "m" : "l"
+            const px = size === "s" ? 42 : size === "m" ? 52 : 62
+            return L.divIcon({
+              html: `<div class="cluster-bubble" data-size="${size}"><span>${count}</span></div>`,
+              className: "cluster-icon",
+              iconSize: [px, px],
+              iconAnchor: [px / 2, px / 2],
+            })
+          },
+        })
+        cluster.addTo(instance)
+        group = cluster
+        markers.current = cluster
+      }
+
+      group.clearLayers()
+      markerIndex.current.clear()
+
+      companies.forEach((company) => {
       const logo = companyLogo(company)
       const element = document.createElement("div")
       element.className = "map-pin" + (logo ? " has-logo" : "")
@@ -329,21 +361,44 @@ export default function MapView({
       markerIndex.current.set(company.id, marker)
     })
 
-    const current = selectedRef.current
-    if (current) {
-      const marker = markerIndex.current.get(current.id)
-      marker?.getElement()?.classList.add("is-selected")
-      marker?.setZIndexOffset(900)
+      const current = selectedRef.current
+      if (current) {
+        const marker = markerIndex.current.get(current.id)
+        if (marker) {
+          marker.setZIndexOffset(900)
+          if (marker.getElement()) {
+            marker.getElement()?.classList.add("is-selected")
+          } else {
+            // The pin is inside a cluster — open it so the pin is revealed.
+            ;(group as L.MarkerClusterGroup).zoomToShowLayer(marker, () => {
+              marker.getElement()?.classList.add("is-selected")
+            })
+          }
+        }
+      }
+    })()
+
+    return () => {
+      cancelled = true
     }
+    // Rebuild pins when the company set changes; the cluster layer persists.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [companies])
 
   useEffect(() => {
+    const group = markers.current as L.MarkerClusterGroup | null
     markerIndex.current.forEach((marker, id) => {
-      const element = marker.getElement()
-      if (!element) return
       const active = selected?.id === id
-      element.classList.toggle("is-selected", active)
       marker.setZIndexOffset(active ? 900 : 0)
+      const element = marker.getElement()
+      if (element) {
+        element.classList.toggle("is-selected", active)
+      } else if (active && group) {
+        // Selected from the list while its pin sits inside a cluster.
+        group.zoomToShowLayer(marker, () => {
+          marker.getElement()?.classList.add("is-selected")
+        })
+      }
     })
   }, [selected])
 

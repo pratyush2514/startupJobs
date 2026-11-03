@@ -1,5 +1,11 @@
-import { roles, type Role } from "../roles"
+import { roles, rolesFetchedAt, type Role } from "../roles"
 import { companies, type Company } from "../data"
+
+/** Raw role list — the single read path for role data.
+///
+/// Every component reads roles through this module, never `../roles`
+/// directly, so a future move (e.g. Supabase) only rewrites this file. */
+export { roles, rolesFetchedAt, type Role }
 
 const byCompany = new Map<string, Role[]>()
 for (const role of roles) {
@@ -50,6 +56,33 @@ export function postedAgo(iso: string | null): string | null {
   }
   const months = Math.floor(days / 30)
   return months === 1 ? "1 month ago" : `${months} months ago`
+}
+
+/** "Nov 3, 2026, 10:51 AM" style exact label; null when unusable. */
+export function postedExact(iso: string | null): string | null {
+  if (!iso) return null
+  const date = new Date(iso)
+  if (Number.isNaN(date.getTime())) return null
+  return date.toLocaleString("en-US", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  })
+}
+
+let descriptionsPromise: Promise<Record<string, string>> | null = null
+
+/** Lazily loads the descriptions chunk (kept out of the main bundle for
+ *  bad networks); resolves null when the role has no fetched description. */
+export function loadRoleDescription(id: string): Promise<string | null> {
+  if (!descriptionsPromise) {
+    descriptionsPromise = import("../roleDescriptions")
+      .then((mod) => mod.roleDescriptions as Record<string, string>)
+      .catch(() => ({}))
+  }
+  return descriptionsPromise.then((map) => map[id] ?? null)
 }
 
 /** Short meta line for a role row: team · level, skipping blanks. */
