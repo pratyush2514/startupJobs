@@ -1,13 +1,17 @@
-name: Refresh roles (free feeds, weekly)
+name: Refresh roles (free feeds, every 6 hours)
 
 # Pulls every company's public ATS / careers JSON feed and commits the
-# regenerated src/roles.ts to the redesign branch. No API keys needed.
-# Runs weekly + on demand. The monthly RapidAPI drip lives in
+# regenerated src/roles.ts on the main branch. No API keys needed.
+# Runs every 6 hours + on demand. The monthly RapidAPI drip lives in
 # refresh-roles-monthly.yml (separate quota).
 
 on:
   schedule:
+<<<<<<< HEAD
     - cron: "0 */6 * * *" # Sundays 02:00 UTC
+=======
+    - cron: "0 */6 * * *" # every 6 hours
+>>>>>>> 5630eaa05d9a263439c07e19a4e69943bb65bbf6
   workflow_dispatch:
 
 permissions:
@@ -35,10 +39,10 @@ jobs:
         run: |
           git config user.name "roles-bot"
           git config user.email "roles-bot@users.noreply.github.com"
-          git add src/roles.ts
+          git add src/roles.ts src/roleDescriptions.ts
           if git diff --cached --quiet; then
             echo "no role changes"
           else
-            git commit -m "chore: weekly roles refresh $(date -u +%F)"
-            git push origin redesign
+            git commit -m "chore: roles refresh $(date -u +%F-%H%M)"
+            git push origin main
           fi

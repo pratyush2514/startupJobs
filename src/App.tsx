@@ -3,7 +3,7 @@ import type { Company } from "./data"
 import { Header } from "./components/Header"
 import { Footer } from "./components/Footer"
 import { MobileNav } from "./components/MobileNav"
-import { CompanyDialog } from "./components/CompanyDialog"
+import { CompanyPanel } from "./components/CompanyPanel"
 import { ArrowRight, ArrowUpRight, MapIcon } from "./components/icons"
 import {
   useRoute,
@@ -171,7 +171,7 @@ export default function App() {
       />
 
       {selected && (
-        <CompanyDialog
+        <CompanyPanel
           company={selected}
           onClose={() => setSelected(null)}
         />

@@ -19,7 +19,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: redesign
+          ref: main
 
       - uses: actions/setup-python@v5
         with:
@@ -41,5 +41,5 @@ jobs:
             echo "no role changes"
           else
             git commit -m "chore: monthly roles refresh incl. API drip $(date -u +%F)"
-            git push origin redesign
+            git push origin main
           fi
