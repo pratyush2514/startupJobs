@@ -35,7 +35,7 @@ jobs:
         run: |
           git config user.name "roles-bot"
           git config user.email "roles-bot@users.noreply.github.com"
-          git add src/roles.ts src/roleDescriptions.ts
+          git add src/data/roles.ts src/data/roleDescriptions.ts
           if git diff --cached --quiet; then
             echo "no role changes"
           else
