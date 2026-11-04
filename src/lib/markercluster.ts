@@ -21,3 +21,13 @@ export function ensureMarkerCluster(leaflet: typeof L): Promise<void> {
   }
   return ready
 }
+
+/**
+ * Warms the plugin cache early (e.g. when the map scrolls near the
+ * viewport) so pins never render into an empty map while the chunk loads.
+ */
+export function preloadMarkerCluster(): Promise<void> {
+  return import("leaflet").then((mod) =>
+    ensureMarkerCluster(mod.default as typeof L),
+  )
+}
