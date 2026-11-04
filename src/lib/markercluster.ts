@@ -1,5 +1,5 @@
 import type L from "leaflet"
-
+import "leaflet"
 let ready: Promise<void> | null = null
 
 /**
@@ -16,7 +16,7 @@ export function ensureMarkerCluster(leaflet: typeof L): Promise<void> {
   if (!ready) {
     ready = (async () => {
       ;(globalThis as unknown as { L: typeof L }).L = leaflet
-      await import("../vendor/leaflet.markercluster.js")
+      await import("../vendor/leaflet.markercluster")
     })()
   }
   return ready
