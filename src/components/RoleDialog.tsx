@@ -1,10 +1,12 @@
+"use client"
+
+/** Modal shell for role details on the Jobs page (the map uses the panel). */
+
 import { useEffect, useRef } from "react"
 import { Close } from "./icons"
 import { useBodyLock } from "../lib/hooks"
 import type { Role } from "../lib/roles"
 import { RoleDetail } from "./RoleDetail"
-
-/** Modal shell for role details on the Jobs page (the map uses the panel). */
 export function RoleDialog({
   role,
   onClose,

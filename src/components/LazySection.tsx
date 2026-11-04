@@ -1,17 +1,20 @@
-import { useEffect, useRef, useState, type ReactNode } from "react"
-
-type Props = {
-  children: ReactNode
-  /** Reserve space before the section loads so the page doesn't jump. */
-  minHeight?: number
-  label?: string
-}
+"use client"
+/** Reserve space before the section loads so the page doesn't jump. */
 
 /**
  * Defers rendering of below-the-fold sections until they approach the
  * viewport. Renders a lightweight skeleton placeholder first, then mounts
  * the real content and plays its entrance reveal.
  */
+// Play the section's own reveal now that it has mounted.
+
+import { useEffect, useRef, useState, type ReactNode } from "react"
+
+type Props = {
+  children: ReactNode
+  minHeight?: number
+  label?: string
+}
 export function LazySection({ children, minHeight = 360, label }: Props) {
   const host = useRef<HTMLDivElement>(null)
   const [visible, setVisible] = useState(false)
@@ -19,7 +22,12 @@ export function LazySection({ children, minHeight = 360, label }: Props) {
   useEffect(() => {
     const node = host.current
     if (!node) return
-    if (!("IntersectionObserver" in window)) {
+    if (
+      !(
+        "IntersectionObserver" in
+        window
+      )
+    ) {
       setVisible(true)
       return
     }
@@ -39,7 +47,6 @@ export function LazySection({ children, minHeight = 360, label }: Props) {
     if (!visible) return
     const node = host.current
     if (!node) return
-    // Play the section's own reveal now that it has mounted.
     const frame = window.requestAnimationFrame(() => {
       node
         .querySelectorAll<HTMLElement>("[data-reveal]")

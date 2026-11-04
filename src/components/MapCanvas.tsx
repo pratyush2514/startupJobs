@@ -1,10 +1,15 @@
-import { Suspense, lazy, useEffect, useRef, useState } from "react"
-import { type City, type Company } from "../data"
+"use client"
+
+import dynamic from "next/dynamic"
+import { Suspense, useEffect, useRef, useState } from "react"
+import { type City, type Company } from "../data/companies"
 import { SchematicMap } from "./SchematicMap"
-import { preloadMapView } from "../lib/preload"
 import { preloadMarkerCluster } from "../lib/markercluster"
 
-const LazyMapView = lazy(preloadMapView)
+const LazyMapView = dynamic(() => import("./MapView"), {
+  ssr: false,
+  loading: () => null,
+})
 
 type Props = {
   city: City
@@ -28,7 +33,7 @@ export function MapCanvas(props: Props) {
       (entries) => {
         if (!entries.some((entry) => entry.isIntersecting)) return
         setActive(true)
-        void preloadMapView()
+        void import("./MapView")
         void preloadMarkerCluster()
         observer.disconnect()
       },

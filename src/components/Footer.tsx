@@ -1,22 +1,25 @@
+"use client"
+
 import { Brand } from "./Brand"
 import { ArrowUpRight } from "./icons"
+import Link from "next/link"
 
 const columns = [
   {
     title: "Explore",
     links: [
-      { href: "#/map", label: "The map" },
-      { href: "#/cities", label: "Cities" },
-      { href: "#/companies", label: "Companies" },
-      { href: "#/jobs", label: "Career paths" },
+      { href: "/map", label: "The map" },
+      { href: "/cities", label: "Cities" },
+      { href: "/companies", label: "Companies" },
+      { href: "/jobs", label: "Career paths" },
     ],
   },
   {
     title: "Understand",
     links: [
-      { href: "#/about", label: "How it works" },
-      { href: "#/pricing", label: "Access & pricing" },
-      { href: "#/faq", label: "Questions" },
+      { href: "/about", label: "How it works" },
+      { href: "/pricing", label: "Access & pricing" },
+      { href: "/faq", label: "Questions" },
     ],
   },
 ]
@@ -40,9 +43,9 @@ export function Footer() {
           >
             <h2>{column.title}</h2>
             {column.links.map((link) => (
-              <a href={link.href} key={link.href}>
+              <Link href={link.href} key={link.href}>
                 {link.label}
-              </a>
+              </Link>
             ))}
           </nav>
         ))}
@@ -54,9 +57,9 @@ export function Footer() {
             localities, and open roles live on each company&rsquo;s official
             careers page.
           </p>
-          <a href="#/faq" className="text-link">
+          <Link href="/faq" className="text-link">
             Read the details <ArrowUpRight size={14} />
-          </a>
+          </Link>
         </div>
       </div>
       <div className="container footer-base">

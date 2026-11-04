@@ -1,4 +1,5 @@
 import { Mark } from "./icons"
+import Link from "next/link"
 
 export function Brand({
   small = false,
@@ -8,9 +9,9 @@ export function Brand({
   onNavigate?: () => void
 }) {
   return (
-    <a
+    <Link
       className={`brand${small ? " brand-small" : ""}`}
-      href="#/"
+      href="/"
       aria-label="Startup Arena India — home"
       onClick={onNavigate}
     >
@@ -23,6 +24,6 @@ export function Brand({
         </span>
         <span className="brand-country">India</span>
       </span>
-    </a>
+    </Link>
   )
 }

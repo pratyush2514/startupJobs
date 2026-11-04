@@ -1,5 +1,13 @@
+"use client"
+
+/**
+ * The rich role body: fact grid, description, apply action.
+ * Rendered inside the company side-panel (with back) and the Jobs-page
+ * modal — the shell differs, the content is one place.
+ */
+
 import { useEffect, useState, type ReactNode } from "react"
-import { cities } from "../data"
+import { cities } from "../data/companies"
 import { CompanyLogo } from "./CompanyLogo"
 import { ArrowLeft, ExternalLink, Info, Pin } from "./icons"
 import {
@@ -24,12 +32,6 @@ function workModeLabel(mode: Role["workMode"]): string | null {
   if (mode === "onsite") return "On-site"
   return null
 }
-
-/**
- * The rich role body: fact grid, description, apply action.
- * Rendered inside the company side-panel (with back) and the Jobs-page
- * modal — the shell differs, the content is one place.
- */
 export function RoleDetail({
   role,
   onBack,
@@ -138,9 +140,8 @@ export function RoleDetail({
       <div className="company-note">
         <Info size={15} />
         <p>
-          This role comes from {company?.name ?? "the company"}&rsquo;s own
-          job board. You&rsquo;ll apply on their site — we never take
-          applications.
+          This role comes from {company?.name ?? "the company"}&rsquo;s own job
+          board. You&rsquo;ll apply on their site — we never take applications.
         </p>
       </div>
     </div>

@@ -18,7 +18,7 @@ Flags:
     --domain    company domain, e.g. figma.com (used for logo + careers URL)
     --category  sector label, e.g. "Design tools" (prompted when missing)
     --color     monogram fallback color (prompted when missing)
-    --apply     actually patch src/data.ts, scripts/fetch-roles.py and write
+    --apply     actually patch src/data/companies.ts, scripts/fetch-roles.py and write
                 the logo file. Without it, prints what WOULD change.
     --fetch     after --apply, run scripts/fetch-roles.py to regenerate roles
     --yes       answer every confirmation with yes (needs --category/--color)
@@ -227,7 +227,7 @@ def city_center(city_id):
                   r'tagline: "[^"]*",\s*lat: ([\d.]+),\s*lng: ([\d.]+)'
                   % re.escape(city_id), src)
     if not m:
-        sys.exit(f"ERROR: city {city_id!r} not found in src/data.ts")
+        sys.exit(f"ERROR: city {city_id!r} not found in src/data/companies.ts")
     return float(m.group(1)), float(m.group(2))
 
 
@@ -237,7 +237,7 @@ def patch_data_ts(entry, slug):
     path = os.path.join(ROOT, "src", "data.ts")
     src = open(path).read()
     if f'id: "{entry["id"]}"' in src:
-        sys.exit(f"ERROR: {entry['id']} already in src/data.ts")
+        sys.exit(f"ERROR: {entry['id']} already in src/data/companies.ts")
 
     block = ("  {\n"
              f'    id: "{entry["id"]}",\n'
@@ -257,7 +257,7 @@ def patch_data_ts(entry, slug):
     anchor = "const logoFiles"
     idx = src.find(anchor)
     if idx < 0:
-        sys.exit("ERROR: logoFiles anchor not found in src/data.ts")
+        sys.exit("ERROR: logoFiles anchor not found in src/data/companies.ts")
     close = src.rfind("\n]\n", 0, idx)
     if close < 0:
         sys.exit("ERROR: companies array close not found")
@@ -286,7 +286,7 @@ def patch_data_ts(entry, slug):
     lines.insert(pos, new_line)
     src = (src[:m.start(1)] + "\n".join(lines) + src[m.end(1):])
     open(path, "w").write(src)
-    print("  patched src/data.ts (company entry + logoFiles)")
+    print("  patched src/data/companies.ts (company entry + logoFiles)")
 
 
 def patch_fetch_roles(board_slug, cid, platform):
@@ -434,7 +434,7 @@ def main():
 
     if not ARGS.apply:
         print("\nDry run — nothing written. Re-run with --apply to patch "
-              "src/data.ts, scripts/fetch-roles.py and save the logo.")
+              "src/data/companies.ts, scripts/fetch-roles.py and save the logo.")
         return
 
     patch_data_ts(entry, SLUG)

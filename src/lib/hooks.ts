@@ -1,38 +1,13 @@
-import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react"
-
-export type PageRoute = {
-  page: string
-  params: URLSearchParams
-  hash: string
-}
-
-const subscribeToHash = (onChange: () => void) => {
-  window.addEventListener("hashchange", onChange)
-  window.addEventListener("popstate", onChange)
-  return () => {
-    window.removeEventListener("hashchange", onChange)
-    window.removeEventListener("popstate", onChange)
-  }
-}
-
-const readHash = () => window.location.hash
-const readServerHash = () => ""
-
-export function useRoute(): PageRoute {
-  const hash = useSyncExternalStore(subscribeToHash, readHash, readServerHash)
-  const [path, query = ""] = hash.replace(/^#\/?/, "").split("?")
-  return {
-    page: (path || "home").replace(/\/$/, ""),
-    params: new URLSearchParams(query),
-    hash,
-  }
-}
+import { useCallback, useEffect, useRef, useState } from "react"
 
 type Theme = "dark" | "light"
 
 export function useTheme() {
   const [theme, setTheme] = useState<Theme>(() =>
-    document.documentElement.dataset.theme === "light" ? "light" : "dark",
+    typeof document === "undefined" ||
+    document.documentElement.dataset.theme !== "light"
+      ? "dark"
+      : "light",
   )
 
   useEffect(() => {
@@ -44,7 +19,9 @@ export function useTheme() {
     } catch {
       /* storage can be unavailable */
     }
-    const meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')
+    const meta = document.querySelector<HTMLMetaElement>(
+      'meta[name="theme-color"]',
+    )
     if (meta) meta.content = theme === "dark" ? "#0c0e0c" : "#f7f7f2"
   }, [theme])
 
@@ -99,9 +76,9 @@ type Connection = {
 
 export function useSlowConnection() {
   const read = () => {
-    const connection = (
-      navigator as Navigator & { connection?: Connection }
-    ).connection
+    if (typeof navigator === "undefined") return false
+    const connection = (navigator as Navigator & { connection?: Connection })
+      .connection
     return Boolean(
       connection?.saveData || /(^|-)2g$/.test(connection?.effectiveType ?? ""),
     )
@@ -109,9 +86,8 @@ export function useSlowConnection() {
   const [slow, setSlow] = useState(read)
 
   useEffect(() => {
-    const connection = (
-      navigator as Navigator & { connection?: Connection }
-    ).connection
+    const connection = (navigator as Navigator & { connection?: Connection })
+      .connection
     if (!connection?.addEventListener) return
     const update = () => setSlow(read())
     connection.addEventListener("change", update)
@@ -154,51 +130,6 @@ export function useMediaQuery(query: string) {
     return () => list.removeEventListener("change", update)
   }, [query])
   return matches
-}
-
-/**
- * Reveals [data-reveal] blocks as they enter the viewport.
- * The `.js` class is set in the document head, so content stays visible
- * when scripting is unavailable.
- */
-export function useReveal(key: string) {
-  useEffect(() => {
-    const scope = document.querySelector("main")
-    if (!scope) return
-    const items = Array.from(scope.querySelectorAll<HTMLElement>("[data-reveal]"))
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    if (reduced || !("IntersectionObserver" in window)) {
-      items.forEach((item) => item.classList.add("is-in"))
-      return
-    }
-
-    items.forEach((item, index) => {
-      const siblings = Array.from(item.parentElement?.children ?? []).filter(
-        (child) => child.hasAttribute("data-reveal"),
-      )
-      const order = Math.min(Math.max(siblings.indexOf(item), 0), 6)
-      item.style.setProperty("--reveal-delay", `${order * 55}ms`)
-      if (item.getBoundingClientRect().top < window.innerHeight * 0.94) {
-        item.classList.add("is-in")
-      }
-    })
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (!entry.isIntersecting) return
-          entry.target.classList.add("is-in")
-          observer.unobserve(entry.target)
-        })
-      },
-      { threshold: 0.08, rootMargin: "0px 0px -4% 0px" },
-    )
-
-    items
-      .filter((item) => !item.classList.contains("is-in"))
-      .forEach((item) => observer.observe(item))
-    return () => observer.disconnect()
-  }, [key])
 }
 
 export function useSearchShortcut(onTrigger: () => void, enabled = true) {

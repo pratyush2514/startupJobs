@@ -1,5 +1,5 @@
-import { roles, rolesFetchedAt, type Role } from "../roles"
-import { companies, type Company } from "../data"
+import { roles, rolesFetchedAt, type Role } from "../data/roles"
+import { companies, type Company } from "../data/companies"
 
 /** Raw role list — the single read path for role data.
 ///
@@ -14,9 +14,7 @@ for (const role of roles) {
   else byCompany.set(role.companyId, [role])
 }
 
-const companyById = new Map<string, Company>(
-  companies.map((c) => [c.id, c]),
-)
+const companyById = new Map<string, Company>(companies.map((c) => [c.id, c]))
 
 /** The company a role belongs to. */
 export function companyForRole(role: Role): Company | undefined {
@@ -78,7 +76,7 @@ let descriptionsPromise: Promise<Record<string, string>> | null = null
  *  bad networks); resolves null when the role has no fetched description. */
 export function loadRoleDescription(id: string): Promise<string | null> {
   if (!descriptionsPromise) {
-    descriptionsPromise = import("../roleDescriptions")
+    descriptionsPromise = import("../data/roleDescriptions")
       .then((mod) => mod.roleDescriptions as Record<string, string>)
       .catch(() => ({}))
   }
