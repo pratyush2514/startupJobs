@@ -1,4 +1,4 @@
-import { type Company } from "../data"
+import { type Company } from "../data/companies"
 import { CompanyLogo } from "./CompanyLogo"
 import { ArrowRight, ArrowUpRight, Pin } from "./icons"
 import { roleCountForCompany } from "../lib/roles"

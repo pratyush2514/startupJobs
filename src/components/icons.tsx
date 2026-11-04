@@ -5,12 +5,7 @@ type IconProps = SVGProps<SVGSVGElement> & {
   strokeWidth?: number
 }
 
-function Icon({
-  size = 18,
-  strokeWidth = 1.6,
-  children,
-  ...rest
-}: IconProps) {
+function Icon({ size = 18, strokeWidth = 1.6, children, ...rest }: IconProps) {
   return (
     <svg
       width={size}
@@ -216,7 +211,10 @@ export function Fit(props: IconProps) {
   return (
     <Icon {...props}>
       <path d="M9 4H4v5M15 4h5v5M9 20H4v-5M15 20h5v-5" />
-      <path d="M4.8 4.9 9 9.1M15 9.1l4.2-4.2M4.8 19.1 9 14.9M15 14.9l4.2 4.2" opacity=".45" />
+      <path
+        d="M4.8 4.9 9 9.1M15 9.1l4.2-4.2M4.8 19.1 9 14.9M15 14.9l4.2 4.2"
+        opacity=".45"
+      />
     </Icon>
   )
 }
@@ -316,7 +314,10 @@ export function Layers(props: IconProps) {
   return (
     <Icon {...props}>
       <path d="m12 3.5 8.5 4.7-8.5 4.7-8.5-4.7 8.5-4.7Z" />
-      <path d="m3.5 12.5 8.5 4.7 8.5-4.7M3.5 16.9l8.5 4.6 8.5-4.6" opacity=".5" />
+      <path
+        d="m3.5 12.5 8.5 4.7 8.5-4.7M3.5 16.9l8.5 4.6 8.5-4.6"
+        opacity=".5"
+      />
     </Icon>
   )
 }

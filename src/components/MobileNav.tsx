@@ -1,44 +1,46 @@
+"use client"
+
 import { useEffect, useRef } from "react"
 import { Brand } from "./Brand"
 import { ArrowUpRight, ChevronRight, Close, Moon, Sun } from "./icons"
-import { cities, companies } from "../data"
-import { preloadPage } from "../lib/preload"
+import { cities, companies } from "../data/companies"
 import { useBodyLock, useMediaQuery } from "../lib/hooks"
+import Link from "next/link"
 
 const links = [
   {
     page: "map",
-    href: "#/map",
+    href: "/map",
     label: "The map",
     hint: "Every company, pinned by neighbourhood",
   },
   {
     page: "cities",
-    href: "#/cities",
+    href: "/cities",
     label: "Cities",
     hint: "Eight hubs, one national view",
   },
   {
     page: "companies",
-    href: "#/companies",
+    href: "/companies",
     label: "Companies",
     hint: "Browse the directory",
   },
   {
     page: "jobs",
-    href: "#/jobs",
+    href: "/jobs",
     label: "Jobs",
     hint: "Open roles, straight from company boards",
   },
   {
     page: "about",
-    href: "#/about",
+    href: "/about",
     label: "How it works",
     hint: "Three steps, no middlemen",
   },
   {
     page: "pricing",
-    href: "#/pricing",
+    href: "/pricing",
     label: "Pricing",
     hint: "Free to explore, always",
   },
@@ -109,34 +111,43 @@ export function MobileNav({
 
         <nav className="nav-dialog-links" aria-label="Primary">
           {links.map((link) => (
-            <a
+            <Link
               key={link.page}
               href={link.href}
               className={activePage === link.page ? "is-active" : ""}
               aria-current={activePage === link.page ? "page" : undefined}
               onClick={onClose}
-              onPointerEnter={() => preloadPage(link.page)}
             >
               <span>
                 <strong>{link.label}</strong>
                 <small>{link.hint}</small>
               </span>
               <ChevronRight size={18} />
-            </a>
+            </Link>
           ))}
         </nav>
 
-        <section className="nav-dialog-cities" aria-labelledby="nav-cities-title">
+        <section
+          className="nav-dialog-cities"
+          aria-labelledby="nav-cities-title"
+        >
           <h2 id="nav-cities-title">Start with a city</h2>
           <div className="nav-city-grid">
             {cities.map((city) => (
-              <a key={city.id} href={`#/map?city=${city.id}`} onClick={onClose}>
+              <Link
+                key={city.id}
+                href={`/map?city=${city.id}`}
+                onClick={onClose}
+              >
                 <span>{city.name}</span>
                 <small>
-                  {companies.filter((company) => company.city === city.id).length}{" "}
+                  {
+                    companies.filter((company) => company.city === city.id)
+                      .length
+                  }{" "}
                   companies
                 </small>
-              </a>
+              </Link>
             ))}
           </div>
         </section>
@@ -152,9 +163,9 @@ export function MobileNav({
               {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
               {theme === "dark" ? "Light theme" : "Dark theme"}
             </button>
-            <a href="#/companies" className="text-link" onClick={onClose}>
+            <Link href="/companies" className="text-link" onClick={onClose}>
               Browse companies <ArrowUpRight size={15} />
-            </a>
+            </Link>
           </div>
         </div>
       </div>

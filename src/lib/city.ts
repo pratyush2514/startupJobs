@@ -1,4 +1,4 @@
-import { cities } from "../data"
+import { cities } from "../data/companies"
 
 const KEY = "sa-city"
 

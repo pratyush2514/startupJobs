@@ -1,5 +1,7 @@
+"use client"
+
 import { useState } from "react"
-import { type Company, companyLogo } from "../data"
+import { type Company, companyLogo } from "../data/companies"
 import { initials, readableOn } from "../lib/utils"
 
 type Size = "sm" | "md" | "lg"

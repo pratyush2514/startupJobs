@@ -1,7 +1,8 @@
-import { cities, companies } from "../data"
+import { cities, companies } from "../data/companies"
 import { ArrowRight, ArrowUpRight, Pin } from "./icons"
 import { CitySkyline } from "./CitySkyline"
 import { plural } from "../lib/utils"
+import Link from "next/link"
 
 const codes: Record<string, string> = {
   bengaluru: "BLR",
@@ -17,7 +18,9 @@ const codes: Record<string, string> = {
 export function CitySection({ full = false }: { full?: boolean }) {
   const visible = full ? cities : cities.slice(0, 4)
   return (
-    <section className={`section cities-section container${full ? " is-full" : ""}`}>
+    <section
+      className={`section cities-section container${full ? " is-full" : ""}`}
+    >
       {!full && (
         <div className="section-heading" data-reveal>
           <div>
@@ -27,9 +30,9 @@ export function CitySection({ full = false }: { full?: boolean }) {
               Same ambition. A different backdrop. Start with a city.
             </p>
           </div>
-          <a href="#/cities" className="text-link">
+          <Link href="/cities" className="text-link">
             Explore all cities <ArrowRight size={15} />
-          </a>
+          </Link>
         </div>
       )}
       <div className={`city-grid${full ? " is-full" : ""}`}>
@@ -38,15 +41,17 @@ export function CitySection({ full = false }: { full?: boolean }) {
             (company) => company.city === city.id,
           ).length
           return (
-            <a
-              href={`#/map?city=${city.id}`}
+            <Link
+              href={`/map?city=${city.id}`}
               className="city-card"
               key={city.id}
               data-reveal
             >
               <div className="city-card-top">
                 <span className="city-code">{codes[city.id]}</span>
-                {index === 0 && <span className="city-tag">Startup capital</span>}
+                {index === 0 && (
+                  <span className="city-tag">Startup capital</span>
+                )}
                 <ArrowUpRight size={17} className="city-card-arrow" />
               </div>
               <div className="city-art">
@@ -68,7 +73,7 @@ export function CitySection({ full = false }: { full?: boolean }) {
                 </span>
                 <ArrowRight size={14} />
               </div>
-            </a>
+            </Link>
           )
         })}
       </div>

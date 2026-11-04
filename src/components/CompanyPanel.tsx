@@ -1,9 +1,21 @@
+"use client"
+
+/**
+ * Right-side panel (bottom sheet on mobile) for the selected map company.
+ * The map stays visible and interactive behind it — unlike the old modal,
+ * the user never loses their place. A role opens its rich detail in the
+ * same panel with a back affordance.
+ */
+
+// A new company always opens on its overview, never on a stale role.
+
 import { useEffect, useRef, useState } from "react"
-import { cities, type Company } from "../data"
+import { cities, type Company } from "../data/companies"
 import { CompanyLogo } from "./CompanyLogo"
 import { ArrowUpRight, Close, ExternalLink, Info, Pin } from "./icons"
 import { postedAgo, roleMeta, rolesForCompany, type Role } from "../lib/roles"
 import { RoleDetail } from "./RoleDetail"
+import Link from "next/link"
 
 function hostname(url: string) {
   try {
@@ -12,13 +24,6 @@ function hostname(url: string) {
     return "Official website"
   }
 }
-
-/**
- * Right-side panel (bottom sheet on mobile) for the selected map company.
- * The map stays visible and interactive behind it — unlike the old modal,
- * the user never loses their place. A role opens its rich detail in the
- * same panel with a back affordance.
- */
 export function CompanyPanel({
   company,
   onClose,
@@ -30,10 +35,14 @@ export function CompanyPanel({
   const closeRef = useRef(onClose)
   closeRef.current = onClose
   const closeButton = useRef<HTMLButtonElement>(null)
-  const city = cities.find((item) => item.id === company.city) ?? cities[0]
+  const city =
+    cities.find(
+      (item) =>
+        item.id ===
+        company.city,
+    ) ??
+    cities[0]
   const companyRoles = rolesForCompany(company.id)
-
-  // A new company always opens on its overview, never on a stale role.
   useEffect(() => {
     setActiveRole(null)
   }, [company.id])
@@ -66,10 +75,7 @@ export function CompanyPanel({
         </button>
 
         {activeRole ? (
-          <RoleDetail
-            role={activeRole}
-            onBack={() => setActiveRole(null)}
-          />
+          <RoleDetail role={activeRole} onBack={() => setActiveRole(null)} />
         ) : (
           <div className="company-panel-body">
             <div className="company-dialog-head">
@@ -129,10 +135,10 @@ export function CompanyPanel({
               <div className="company-note">
                 <Info size={15} />
                 <p>
-                  Verified company profile. The pin marks the office
-                  locality, not the exact building. Open roles live on{" "}
-                  {company.name}&rsquo;s official careers page — we link you
-                  straight there and never take applications.
+                  Verified company profile. The pin marks the office locality,
+                  not the exact building. Open roles live on {company.name}
+                  &rsquo;s official careers page — we link you straight there
+                  and never take applications.
                 </p>
               </div>
             )}
@@ -151,9 +157,9 @@ export function CompanyPanel({
             </a>
             <p className="company-dialog-foot">
               Opens the company&rsquo;s official careers page in a new tab.
-              <a href="#/companies" onClick={onClose}>
+              <Link href="/companies" onClick={onClose}>
                 Browse more companies <ArrowUpRight size={13} />
-              </a>
+              </Link>
             </p>
           </div>
         )}

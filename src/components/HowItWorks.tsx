@@ -1,12 +1,4 @@
-import {
-  ArrowUpRight,
-  Briefcase,
-  Check,
-  Code,
-  Pen,
-  Pin,
-  Search,
-} from "./icons"
+import { ArrowUpRight, Briefcase, Check, Code, Pen, Pin, Search } from "./icons"
 
 const steps = [
   {
@@ -78,7 +70,9 @@ const steps = [
           <span>Make your move</span>
           <ArrowUpRight size={13} />
         </div>
-        <span className="mini-label mini-label-source">Official careers page</span>
+        <span className="mini-label mini-label-source">
+          Official careers page
+        </span>
       </div>
     ),
   },

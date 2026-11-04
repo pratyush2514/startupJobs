@@ -1,14 +1,14 @@
 import { Brand } from "./Brand"
 import { ArrowUpRight, MapIcon, Menu, Moon, Sun } from "./icons"
-import { preloadPage } from "../lib/preload"
+import Link from "next/link"
 
 const navigation = [
-  { page: "map", href: "#/map", label: "Map" },
-  { page: "cities", href: "#/cities", label: "Cities" },
-  { page: "companies", href: "#/companies", label: "Companies" },
-  { page: "jobs", href: "#/jobs", label: "Jobs" },
-  { page: "about", href: "#/about", label: "How it works" },
-  { page: "pricing", href: "#/pricing", label: "Pricing" },
+  { page: "map", href: "/map", label: "Map" },
+  { page: "cities", href: "/cities", label: "Cities" },
+  { page: "companies", href: "/companies", label: "Companies" },
+  { page: "jobs", href: "/jobs", label: "Jobs" },
+  { page: "about", href: "/about", label: "How it works" },
+  { page: "pricing", href: "/pricing", label: "Pricing" },
 ]
 
 export function Header({
@@ -37,16 +37,14 @@ export function Header({
         <Brand />
         <nav className="primary-nav" aria-label="Primary">
           {navigation.map((item) => (
-            <a
+            <Link
               key={item.page}
               href={item.href}
               className={activePage === item.page ? "is-active" : ""}
               aria-current={activePage === item.page ? "page" : undefined}
-              onPointerEnter={() => preloadPage(item.page)}
-              onFocus={() => preloadPage(item.page)}
             >
               {item.label}
-            </a>
+            </Link>
           ))}
         </nav>
         <div className="header-actions">
@@ -55,7 +53,9 @@ export function Header({
             className="icon-button theme-button"
             onClick={onToggleTheme}
             aria-label={
-              theme === "dark" ? "Switch to light theme" : "Switch to dark theme"
+              theme === "dark"
+                ? "Switch to light theme"
+                : "Switch to dark theme"
             }
             title={theme === "dark" ? "Light theme" : "Dark theme"}
           >
@@ -63,16 +63,11 @@ export function Header({
               {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
             </span>
           </button>
-          <a
-            href="#/map"
-            className="button button-dark header-cta"
-            onPointerEnter={() => preloadPage("map")}
-            onFocus={() => preloadPage("map")}
-          >
+          <Link href="/map" className="button button-dark header-cta">
             <MapIcon size={16} />
             <span>Open the map</span>
             <ArrowUpRight size={15} />
-          </a>
+          </Link>
           <button
             type="button"
             className="icon-button menu-button"

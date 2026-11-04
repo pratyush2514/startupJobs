@@ -1,4 +1,4 @@
-import { faqs } from "../data"
+import { faqs } from "../data/companies"
 
 export function FAQ() {
   return (

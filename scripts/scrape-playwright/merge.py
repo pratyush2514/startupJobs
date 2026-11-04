@@ -1,7 +1,7 @@
-"""Merge Playwright scraper output into src/roles.ts — standalone.
+"""Merge Playwright scraper output into src/data/roles.ts — standalone.
 
 Reads scripts/scrape-playwright/out/*.json (role dicts written by scrape.py),
-surgically replaces any existing "pw-" roles in src/roles.ts, and writes back.
+surgically replaces any existing "pw-" roles in src/data/roles.ts, and writes back.
 Idempotent: run it any number of times, result is the same.
 
 This exists so the weekly JSON-feed workflow (fetch-roles.py, which
@@ -18,7 +18,7 @@ import re
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, "out")
-ROLES_TS = os.path.join(HERE, "..", "..", "src", "roles.ts")
+ROLES_TS = os.path.join(HERE, "..", "..", "src", "data", "roles.ts")
 
 KEYS = ["id", "companyId", "title", "team", "level", "location",
         "city", "workMode", "postedAt", "applyUrl"]

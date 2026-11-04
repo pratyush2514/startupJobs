@@ -1,5 +1,7 @@
+"use client"
+
 import { useMemo } from "react"
-import { type City, type Company } from "../data"
+import { type City, type Company } from "../data/companies"
 import { monogram, readableOn } from "../lib/utils"
 import { Pin } from "./icons"
 
@@ -156,9 +158,7 @@ export function SchematicMap({
             onClick={() => onSelect(company)}
             aria-label={`${company.name}, ${company.area}, ${city.name}`}
           >
-            <span className="schematic-pin-body">
-              {monogram(company.name)}
-            </span>
+            <span className="schematic-pin-body">{monogram(company.name)}</span>
             <em>{company.name}</em>
           </button>
         ))}

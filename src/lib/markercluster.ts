@@ -10,7 +10,9 @@ let ready: Promise<void> | null = null
  * Resolves immediately on later calls.
  */
 export function ensureMarkerCluster(leaflet: typeof L): Promise<void> {
-  if ((leaflet as unknown as { markerClusterGroup?: unknown }).markerClusterGroup) {
+  if (
+    (leaflet as unknown as { markerClusterGroup?: unknown }).markerClusterGroup
+  ) {
     return Promise.resolve()
   }
   if (!ready) {

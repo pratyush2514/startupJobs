@@ -1,4 +1,5 @@
 import { ArrowRight, ArrowUpRight, Check, Compass } from "./icons"
+import Link from "next/link"
 
 const included = [
   "Every city and every company on the map",
@@ -9,16 +10,20 @@ const included = [
 
 export function Pricing({ standalone = false }: { standalone?: boolean }) {
   return (
-    <section className={`section pricing-section container${standalone ? " is-standalone" : ""}`}>
+    <section
+      className={`section pricing-section container${
+        standalone ? " is-standalone" : ""
+      }`}
+    >
       {!standalone && (
         <div className="section-heading" data-reveal>
           <div>
             <p className="kicker">Opportunity should be open</p>
             <h2>Start exploring. Stay curious.</h2>
           </div>
-          <a href="#/pricing" className="text-link">
+          <Link href="/pricing" className="text-link">
             More about access <ArrowRight size={15} />
-          </a>
+          </Link>
         </div>
       )}
       <div className="pricing-grid">
@@ -44,9 +49,9 @@ export function Pricing({ standalone = false }: { standalone?: boolean }) {
               </li>
             ))}
           </ul>
-          <a className="button button-primary" href="#/map">
+          <Link className="button button-primary" href="/map">
             Start exploring <ArrowUpRight size={16} />
-          </a>
+          </Link>
         </article>
 
         <article className="pricing-card is-future" data-reveal>
@@ -58,8 +63,7 @@ export function Pricing({ standalone = false }: { standalone?: boolean }) {
           </div>
           <h3>
             A little more direction.
-            <br />
-            A lot more possibility.
+            <br />A lot more possibility.
           </h3>
           <p>
             Personalised matches, a place to keep track of your journey, and
@@ -69,9 +73,9 @@ export function Pricing({ standalone = false }: { standalone?: boolean }) {
             We’re just getting started. These features aren’t part of this
             preview yet.
           </div>
-          <a href="#/faq" className="text-link">
+          <Link href="/faq" className="text-link">
             Get to know Startup Arena <ArrowRight size={15} />
-          </a>
+          </Link>
         </article>
       </div>
     </section>
