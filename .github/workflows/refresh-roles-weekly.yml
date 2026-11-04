@@ -1,13 +1,13 @@
 name: Refresh roles (free feeds, every 6 hours)
 
 # Pulls every company's public ATS / careers JSON feed and commits the
-# regenerated src/roles.ts on the main branch. No API keys needed.
+# regenerated src/data/roles.ts on the main branch. No API keys needed.
 # Runs every 6 hours + on demand. The monthly RapidAPI drip lives in
 # refresh-roles-monthly.yml (separate quota).
 
 on:
   schedule:
-    - cron: "0 */6 * * *" # Sundays 02:00 UTC
+    - cron: "0 */6 * * *" # every 6 hours
   workflow_dispatch:
 
 permissions:
@@ -25,6 +25,12 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Install logo fetcher dependencies
+        run: pip install --quiet pillow
+
+      - name: Fetch missing company logos
+        run: python3 scripts/fetch-logos.py
+
       - name: Fetch roles from public feeds
         run: python3 scripts/fetch-roles.py
       - name: Re-apply Playwright scraper roles
@@ -35,7 +41,7 @@ jobs:
         run: |
           git config user.name "roles-bot"
           git config user.email "roles-bot@users.noreply.github.com"
-          git add src/data/roles.ts src/data/roleDescriptions.ts
+          git add src/data/roles.ts src/data/roleDescriptions.ts src/data/companies.ts public/logos/
           if git diff --cached --quiet; then
             echo "no role changes"
           else
