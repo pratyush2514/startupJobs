@@ -1,7 +1,6 @@
 {
   "compilerOptions": {
     "allowImportingTsExtensions": true,
-    "baseUrl": ".",
     "incremental": true,
     "isolatedModules": true,
     "jsx": "preserve",
