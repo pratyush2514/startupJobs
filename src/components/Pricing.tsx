@@ -1,12 +1,12 @@
-import { ArrowRight, ArrowUpRight, Check, Compass } from "./icons"
-import Link from "next/link"
+import Link from "next/link";
+import { ArrowRight, ArrowUpRight, Check, Compass } from "./icons";
 
 const included = [
   "Every city and every company on the map",
   "Company profiles and neighbourhood filters",
   "Direct links to official careers pages",
   "No account, no card, no paywall",
-]
+];
 
 export function Pricing({ standalone = false }: { standalone?: boolean }) {
   return (
@@ -79,5 +79,5 @@ export function Pricing({ standalone = false }: { standalone?: boolean }) {
         </article>
       </div>
     </section>
-  )
+  );
 }

@@ -1,8 +1,8 @@
-"use client"
+"use client";
 
-import { Brand } from "./Brand"
-import { ArrowUpRight } from "./icons"
-import Link from "next/link"
+import Link from "next/link";
+import { Brand } from "./Brand";
+import { ArrowUpRight } from "./icons";
 
 const columns = [
   {
@@ -22,7 +22,7 @@ const columns = [
       { href: "/faq", label: "Questions" },
     ],
   },
-]
+];
 
 export function Footer() {
   return (
@@ -84,5 +84,5 @@ export function Footer() {
         </button>
       </div>
     </footer>
-  )
+  );
 }

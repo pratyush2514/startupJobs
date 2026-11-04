@@ -31,5 +31,5 @@ export function CitySkyline({ variant = 0 }: { variant?: number }) {
         strokeLinejoin="round"
       />
     </svg>
-  )
+  );
 }

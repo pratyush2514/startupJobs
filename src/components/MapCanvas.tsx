@@ -1,47 +1,47 @@
-"use client"
+"use client";
 
-import dynamic from "next/dynamic"
-import { Suspense, useEffect, useRef, useState } from "react"
-import { type City, type Company } from "../data/companies"
-import { SchematicMap } from "./SchematicMap"
-import { preloadMarkerCluster } from "../lib/markercluster"
+import dynamic from "next/dynamic";
+import { Suspense, useEffect, useRef, useState } from "react";
+import type { City, Company } from "../data/companies";
+import { preloadMarkerCluster } from "../lib/markercluster";
+import { SchematicMap } from "./SchematicMap";
 
 const LazyMapView = dynamic(() => import("./MapView"), {
   ssr: false,
   loading: () => null,
-})
+});
 
 type Props = {
-  city: City
-  companies: Company[]
-  dark: boolean
-  selected?: Company | null
-  onSelect: (company: Company) => void
-  preview?: boolean
-}
+  city: City;
+  companies: Company[];
+  dark: boolean;
+  selected?: Company | null;
+  onSelect: (company: Company) => void;
+  preview?: boolean;
+};
 
 export function MapCanvas(props: Props) {
-  const host = useRef<HTMLDivElement>(null)
-  const [active, setActive] = useState(false)
+  const host = useRef<HTMLDivElement>(null);
+  const [active, setActive] = useState(false);
 
   useEffect(() => {
     if (!("IntersectionObserver" in window)) {
-      setActive(true)
-      return
+      setActive(true);
+      return;
     }
     const observer = new IntersectionObserver(
       (entries) => {
-        if (!entries.some((entry) => entry.isIntersecting)) return
-        setActive(true)
-        void import("./MapView")
-        void preloadMarkerCluster()
-        observer.disconnect()
+        if (!entries.some((entry) => entry.isIntersecting)) return;
+        setActive(true);
+        void import("./MapView");
+        void preloadMarkerCluster();
+        observer.disconnect();
       },
       { rootMargin: "600px 0px" },
-    )
-    if (host.current) observer.observe(host.current)
-    return () => observer.disconnect()
-  }, [])
+    );
+    if (host.current) observer.observe(host.current);
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <div className="map-canvas" ref={host}>
@@ -70,5 +70,5 @@ export function MapCanvas(props: Props) {
         />
       )}
     </div>
-  )
+  );
 }

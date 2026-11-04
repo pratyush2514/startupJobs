@@ -1,6 +1,6 @@
-import { Brand } from "./Brand"
-import { ArrowUpRight, MapIcon, Menu, Moon, Sun } from "./icons"
-import Link from "next/link"
+import Link from "next/link";
+import { Brand } from "./Brand";
+import { ArrowUpRight, MapIcon, Menu, Moon, Sun } from "./icons";
 
 const navigation = [
   { page: "map", href: "/map", label: "Map" },
@@ -9,7 +9,7 @@ const navigation = [
   { page: "jobs", href: "/jobs", label: "Jobs" },
   { page: "about", href: "/about", label: "How it works" },
   { page: "pricing", href: "/pricing", label: "Pricing" },
-]
+];
 
 export function Header({
   page,
@@ -19,14 +19,14 @@ export function Header({
   onOpenMenu,
   slim = false,
 }: {
-  page: string
-  theme: "dark" | "light"
-  scrolled: boolean
-  onToggleTheme: () => void
-  onOpenMenu: () => void
-  slim?: boolean
+  page: string;
+  theme: "dark" | "light";
+  scrolled: boolean;
+  onToggleTheme: () => void;
+  onOpenMenu: () => void;
+  slim?: boolean;
 }) {
-  const activePage = page
+  const activePage = page;
   return (
     <header
       className={`site-header${scrolled ? " is-scrolled" : ""}${
@@ -48,10 +48,12 @@ export function Header({
           ))}
         </nav>
         <div className="header-actions">
+          {/* Theme is client-only state (pre-paint script + localStorage); the static prerender is always dark. Suppress the expected mismatch — the client value wins. */}
           <button
             type="button"
             className="icon-button theme-button"
             onClick={onToggleTheme}
+            suppressHydrationWarning
             aria-label={
               theme === "dark"
                 ? "Switch to light theme"
@@ -80,5 +82,5 @@ export function Header({
         </div>
       </div>
     </header>
-  )
+  );
 }

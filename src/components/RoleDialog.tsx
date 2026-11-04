@@ -1,32 +1,32 @@
-"use client"
+"use client";
 
 /** Modal shell for role details on the Jobs page (the map uses the panel). */
 
-import { useEffect, useRef } from "react"
-import { Close } from "./icons"
-import { useBodyLock } from "../lib/hooks"
-import type { Role } from "../lib/roles"
-import { RoleDetail } from "./RoleDetail"
+import { useEffect, useRef } from "react";
+import { useBodyLock } from "../lib/hooks";
+import type { Role } from "../lib/roles";
+import { Close } from "./icons";
+import { RoleDetail } from "./RoleDetail";
 export function RoleDialog({
   role,
   onClose,
 }: {
-  role: Role
-  onClose: () => void
+  role: Role;
+  onClose: () => void;
 }) {
-  const dialog = useRef<HTMLDialogElement>(null)
-  const closeRef = useRef(onClose)
-  closeRef.current = onClose
-  useBodyLock(true)
+  const dialog = useRef<HTMLDialogElement>(null);
+  const closeRef = useRef(onClose);
+  closeRef.current = onClose;
+  useBodyLock(true);
 
   useEffect(() => {
-    const node = dialog.current
-    if (!node) return
-    if (!node.open) node.showModal()
+    const node = dialog.current;
+    if (!node) return;
+    if (!node.open) node.showModal();
     return () => {
-      if (node.open) node.close()
-    }
-  }, [])
+      if (node.open) node.close();
+    };
+  }, []);
 
   return (
     <dialog
@@ -34,11 +34,11 @@ export function RoleDialog({
       className="company-dialog"
       aria-labelledby="role-dialog-title"
       onCancel={(event) => {
-        event.preventDefault()
-        closeRef.current()
+        event.preventDefault();
+        closeRef.current();
       }}
       onClick={(event) => {
-        if (event.target === event.currentTarget) closeRef.current()
+        if (event.target === event.currentTarget) closeRef.current();
       }}
     >
       <div className="company-dialog-panel">
@@ -57,5 +57,5 @@ export function RoleDialog({
         <RoleDetail role={role} />
       </div>
     </dialog>
-  )
+  );
 }

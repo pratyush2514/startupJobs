@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 // The company panel (with the roles dataset) only exists after the user
 // picks a company, so it loads on demand instead of weighing down every
@@ -8,46 +8,42 @@
 
 // A new route always starts with a closed menu and no open company panel.
 
+import dynamic from "next/dynamic";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   createContext,
+  type ReactNode,
   useCallback,
   useContext,
   useEffect,
   useRef,
   useState,
-  type ReactNode,
-} from "react"
-import Link from "next/link"
-import dynamic from "next/dynamic"
-import { usePathname } from "next/navigation"
-import type { Company } from "@/data/companies"
-import { Header } from "@/components/Header"
-import { Footer } from "@/components/Footer"
-import { MobileNav } from "@/components/MobileNav"
-import { Reveal } from "@/components/Reveal"
-import { ThemeContext, type Theme } from "@/components/theme"
-import { useScrolled, useTheme } from "@/lib/hooks"
-import { ArrowRight } from "@/components/icons"
+} from "react";
+import { Footer } from "@/components/Footer";
+import { Header } from "@/components/Header";
+import { ArrowRight } from "@/components/icons";
+import { MobileNav } from "@/components/MobileNav";
+import { Reveal } from "@/components/Reveal";
+import { type Theme, ThemeContext } from "@/components/theme";
+import type { Company } from "@/data/companies";
+import { useScrolled, useTheme } from "@/lib/hooks";
+
 const CompanyPanel = dynamic(
   () => import("@/components/CompanyPanel").then((mod) => mod.CompanyPanel),
   { ssr: false },
-)
+);
 
-const SelectCompanyContext = createContext<(company: Company) => void>(() => {})
+const SelectCompanyContext = createContext<(company: Company) => void>(
+  () => {},
+);
 export function useSelectCompany() {
-  return useContext(SelectCompanyContext)
+  return useContext(SelectCompanyContext);
 }
 
 function pageFromPathname(pathname: string): string {
-  if (
-    pathname ===
-    "/"
-  )
-    return "home"
-  return (
-    pathname.split("/")[1] ||
-    "home"
-  )
+  if (pathname === "/") return "home";
+  return pathname.split("/")[1] || "home";
 }
 
 export function Shell({
@@ -55,29 +51,28 @@ export function Shell({
   companyCount,
   roleCount,
 }: {
-  children: ReactNode
-  companyCount: number
-  roleCount: number
+  children: ReactNode;
+  companyCount: number;
+  roleCount: number;
 }) {
-  const pathname = usePathname()
-  const page = pageFromPathname(pathname)
-  const isMap =
-    page ===
-    "map"
-  const { theme, toggle } = useTheme()
-  const scrolled = useScrolled()
-  const [menuOpen, setMenuOpen] = useState(false)
-  const [selected, setSelected] = useState<Company | null>(null)
-  const mainRef = useRef<HTMLElement>(null)
+  const pathname = usePathname();
+  const page = pageFromPathname(pathname);
+  const isMap = page === "map";
+  const { theme, toggle } = useTheme();
+  const scrolled = useScrolled();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [selected, setSelected] = useState<Company | null>(null);
+  const mainRef = useRef<HTMLElement>(null);
+  // biome-ignore lint/correctness/useExhaustiveDependencies: pathname is the intentional reset trigger.
   useEffect(() => {
-    setMenuOpen(false)
-    setSelected(null)
-  }, [pathname])
+    setMenuOpen(false);
+    setSelected(null);
+  }, [pathname]);
 
   const selectCompany = useCallback(
     (company: Company) => setSelected(company),
     [],
-  )
+  );
 
   return (
     <ThemeContext.Provider value={{ theme: theme as Theme, toggle }}>
@@ -87,8 +82,8 @@ export function Shell({
             className="skip-link"
             href="#main"
             onClick={(event) => {
-              event.preventDefault()
-              mainRef.current?.focus()
+              event.preventDefault();
+              mainRef.current?.focus();
             }}
           >
             Skip to content
@@ -149,5 +144,5 @@ export function Shell({
         </div>
       </SelectCompanyContext.Provider>
     </ThemeContext.Provider>
-  )
+  );
 }

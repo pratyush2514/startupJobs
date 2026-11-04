@@ -1,30 +1,33 @@
-"use client"
+"use client";
 
-import { useMemo } from "react"
-import { type City, type Company } from "../data/companies"
-import { monogram, readableOn } from "../lib/utils"
-import { Pin } from "./icons"
+import { useMemo } from "react";
+import type { City, Company } from "../data/companies";
+import { monogram, readableOn } from "../lib/utils";
+import { Pin } from "./icons";
 
 function project(company: Company, city: City, companies: Company[]) {
-  const points = [...companies.map((c) => [c.lat, c.lng]), [city.lat, city.lng]]
-  const lats = points.map((p) => p[0])
-  const lngs = points.map((p) => p[1])
-  let minLat = Math.min(...lats)
-  let maxLat = Math.max(...lats)
-  let minLng = Math.min(...lngs)
-  let maxLng = Math.max(...lngs)
-  const latPad = Math.max((maxLat - minLat) * 0.28, 0.024)
-  const lngPad = Math.max((maxLng - minLng) * 0.28, 0.03)
-  minLat -= latPad
-  maxLat += latPad
-  minLng -= lngPad
-  maxLng += lngPad
-  const x = ((company.lng - minLng) / (maxLng - minLng)) * 100
-  const y = (1 - (company.lat - minLat) / (maxLat - minLat)) * 100
+  const points = [
+    ...companies.map((c) => [c.lat, c.lng]),
+    [city.lat, city.lng],
+  ];
+  const lats = points.map((p) => p[0]);
+  const lngs = points.map((p) => p[1]);
+  let minLat = Math.min(...lats);
+  let maxLat = Math.max(...lats);
+  let minLng = Math.min(...lngs);
+  let maxLng = Math.max(...lngs);
+  const latPad = Math.max((maxLat - minLat) * 0.28, 0.024);
+  const lngPad = Math.max((maxLng - minLng) * 0.28, 0.03);
+  minLat -= latPad;
+  maxLat += latPad;
+  minLng -= lngPad;
+  maxLng += lngPad;
+  const x = ((company.lng - minLng) / (maxLng - minLng)) * 100;
+  const y = (1 - (company.lat - minLat) / (maxLat - minLat)) * 100;
   return {
     left: Math.min(94, Math.max(6, x)),
     top: Math.min(88, Math.max(12, y)),
-  }
+  };
 }
 
 const labelPositions = [
@@ -32,7 +35,7 @@ const labelPositions = [
   { left: "66%", top: "16%" },
   { left: "18%", top: "72%" },
   { left: "68%", top: "76%" },
-]
+];
 
 export function SchematicMap({
   city,
@@ -42,12 +45,12 @@ export function SchematicMap({
   busy = false,
   preview = false,
 }: {
-  city: City
-  companies: Company[]
-  onSelect: (company: Company) => void
-  note?: string
-  busy?: boolean
-  preview?: boolean
+  city: City;
+  companies: Company[];
+  onSelect: (company: Company) => void;
+  note?: string;
+  busy?: boolean;
+  preview?: boolean;
 }) {
   const pins = useMemo(
     () =>
@@ -56,7 +59,7 @@ export function SchematicMap({
         ...project(company, city, companies),
       })),
     [companies, city],
-  )
+  );
 
   return (
     <div
@@ -112,12 +115,8 @@ export function SchematicMap({
           <path d="M760 -20c-8 120 44 180 26 282s-18 178 8 378" />
           <path d="M110 620c60-88 96-104 168-122M600 620c80-64 108-102 158-142M900 620c-30-92-18-130 0-190" />
         </g>
-        <path
-          className="schematic-avenue"
-          d="M-20 254 1020 214"
-          aria-hidden="true"
-        />
-        <g className="schematic-markers" aria-hidden="true">
+        <path className="schematic-avenue" d="M-20 254 1020 214" />
+        <g className="schematic-markers">
           <circle cx="486" cy="274" r="5" />
           <circle cx="486" cy="274" r="13" />
           <path d="M486 254v-16" />
@@ -173,5 +172,5 @@ export function SchematicMap({
         <span />
       </span>
     </div>
-  )
+  );
 }

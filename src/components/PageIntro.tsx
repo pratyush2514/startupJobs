@@ -1,4 +1,4 @@
-import type { ReactNode } from "react"
+import type { ReactNode } from "react";
 
 export function PageIntro({
   kicker,
@@ -6,10 +6,10 @@ export function PageIntro({
   lede,
   children,
 }: {
-  kicker: string
-  title: ReactNode
-  lede: string
-  children?: ReactNode
+  kicker: string;
+  title: ReactNode;
+  lede: string;
+  children?: ReactNode;
 }) {
   return (
     <header className="page-intro container">
@@ -22,5 +22,5 @@ export function PageIntro({
       </p>
       {children}
     </header>
-  )
+  );
 }

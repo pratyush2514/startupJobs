@@ -1,4 +1,12 @@
-import { ArrowUpRight, Briefcase, Check, Code, Pen, Pin, Search } from "./icons"
+import {
+  ArrowUpRight,
+  Briefcase,
+  Check,
+  Code,
+  Pen,
+  Pin,
+  Search,
+} from "./icons";
 
 const steps = [
   {
@@ -76,7 +84,7 @@ const steps = [
       </div>
     ),
   },
-]
+];
 
 export function HowItWorks() {
   return (
@@ -101,5 +109,5 @@ export function HowItWorks() {
         ))}
       </div>
     </section>
-  )
+  );
 }

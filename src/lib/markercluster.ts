@@ -1,6 +1,6 @@
-import type L from "leaflet"
-import "leaflet"
-let ready: Promise<void> | null = null
+import type L from "leaflet";
+
+let ready: Promise<void> | null = null;
 
 /**
  * Loads the vendored leaflet.markercluster UMD exactly once.
@@ -13,15 +13,15 @@ export function ensureMarkerCluster(leaflet: typeof L): Promise<void> {
   if (
     (leaflet as unknown as { markerClusterGroup?: unknown }).markerClusterGroup
   ) {
-    return Promise.resolve()
+    return Promise.resolve();
   }
   if (!ready) {
     ready = (async () => {
-      ;(globalThis as unknown as { L: typeof L }).L = leaflet
-      await import("../vendor/leaflet.markercluster")
-    })()
+      (globalThis as unknown as { L: typeof L }).L = leaflet;
+      await import("../vendor/leaflet.markercluster.js");
+    })();
   }
-  return ready
+  return ready;
 }
 
 /**
@@ -31,5 +31,5 @@ export function ensureMarkerCluster(leaflet: typeof L): Promise<void> {
 export function preloadMarkerCluster(): Promise<void> {
   return import("leaflet").then((mod) =>
     ensureMarkerCluster(mod.default as typeof L),
-  )
+  );
 }

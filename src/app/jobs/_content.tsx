@@ -1,12 +1,9 @@
-"use client"
+"use client";
 
-import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react"
-import Link from "next/link"
-import { useSearchParams } from "next/navigation"
-import { cities } from "@/data/companies"
-import { PageIntro } from "@/components/PageIntro"
-import { CompanyLogo } from "@/components/CompanyLogo"
-import { RoleDialog } from "@/components/RoleDialog"
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
+import { CompanyLogo } from "@/components/CompanyLogo";
 import {
   ArrowRight,
   ArrowUpRight,
@@ -15,53 +12,56 @@ import {
   Close,
   MapIcon,
   Search,
-} from "@/components/icons"
-import { cityFromParam, getLastCity, setLastCity } from "@/lib/city"
-import { useSearchShortcut } from "@/lib/hooks"
+} from "@/components/icons";
+import { PageIntro } from "@/components/PageIntro";
+import { RoleDialog } from "@/components/RoleDialog";
+import { cities } from "@/data/companies";
+import { cityFromParam, getLastCity, setLastCity } from "@/lib/city";
+import { useSearchShortcut } from "@/lib/hooks";
 import {
   companyForRole,
   postedAgo,
+  type Role,
   roleMeta,
   roles,
   rolesFetchedAt,
-  type Role,
-} from "@/lib/roles"
-import { plural } from "@/lib/utils"
+} from "@/lib/roles";
+import { plural } from "@/lib/utils";
 
 function fetchedLabel(): string {
-  const d = new Date(rolesFetchedAt)
-  if (Number.isNaN(d.getTime())) return ""
-  return d.toLocaleDateString("en-IN", { day: "numeric", month: "short" })
+  const d = new Date(rolesFetchedAt);
+  if (Number.isNaN(d.getTime())) return "";
+  return d.toLocaleDateString("en-IN", { day: "numeric", month: "short" });
 }
 
 export function JobsContent() {
-  const searchParams = useSearchParams()
+  const searchParams = useSearchParams();
   const [cityId, setCityId] = useState(() => {
-    const fromParam = cityFromParam(searchParams.get("city"))
-    if (fromParam) return fromParam
-    const last = getLastCity()
-    return last ?? "all"
-  })
-  const [search, setSearch] = useState("")
-  const deferredSearch = useDeferredValue(search)
-  const [team, setTeam] = useState("All teams")
-  const [selected, setSelected] = useState<Role | null>(null)
-  const searchRef = useRef<HTMLInputElement>(null)
-  useSearchShortcut(() => searchRef.current?.focus())
+    const fromParam = cityFromParam(searchParams.get("city"));
+    if (fromParam) return fromParam;
+    const last = getLastCity();
+    return last ?? "all";
+  });
+  const [search, setSearch] = useState("");
+  const deferredSearch = useDeferredValue(search);
+  const [team, setTeam] = useState("All teams");
+  const [selected, setSelected] = useState<Role | null>(null);
+  const searchRef = useRef<HTMLInputElement>(null);
+  useSearchShortcut(() => searchRef.current?.focus());
 
   useEffect(() => {
-    if (cityId !== "all") setLastCity(cityId)
-    const next = cityId === "all" ? "/jobs" : `/jobs?city=${cityId}`
+    if (cityId !== "all") setLastCity(cityId);
+    const next = cityId === "all" ? "/jobs" : `/jobs?city=${cityId}`;
     if (window.location.pathname + window.location.search !== next) {
-      window.history.replaceState(null, "", next)
+      window.history.replaceState(null, "", next);
     }
-    document.title = "Open roles at India\u2019s startups \u2014 Startup Arena"
-  }, [cityId])
+    document.title = "Open roles at India\u2019s startups \u2014 Startup Arena";
+  }, [cityId]);
 
   const cityRoles = useMemo(
     () => (cityId === "all" ? roles : roles.filter((r) => r.city === cityId)),
     [cityId],
-  )
+  );
 
   const teams = useMemo(
     () =>
@@ -72,28 +72,29 @@ export function JobsContent() {
         ).sort(),
       ] as string[],
     [cityRoles],
-  )
+  );
 
   const filtered = useMemo(() => {
-    const term = deferredSearch.trim().toLowerCase()
+    const term = deferredSearch.trim().toLowerCase();
     return cityRoles.filter((role) => {
-      const company = companyForRole(role)
+      const company = companyForRole(role);
       const haystack =
-        `${role.title} ${role.team ?? ""} ${role.location ?? ""} ${company?.name ?? ""}`.toLowerCase()
+        `${role.title} ${role.team ?? ""} ${role.location ?? ""} ${company?.name ?? ""}`.toLowerCase();
       return (
         (!term || haystack.includes(term)) &&
         (team === "All teams" || role.team === team)
-      )
-    })
-  }, [cityRoles, deferredSearch, team])
+      );
+    });
+  }, [cityRoles, deferredSearch, team]);
 
   const clearAll = () => {
-    setSearch("")
-    setTeam("All teams")
-  }
+    setSearch("");
+    setTeam("All teams");
+  };
 
   return (
-    <div className="inner-page jobs-page">
+    <div className="inner-page jobs-page" suppressHydrationWarning>
+      {/* City is client-only state (URL query / localStorage); the static prerender uses the default. Suppress the expected mismatch — the client value wins. */}
       <PageIntro
         kicker="Open roles"
         title={
@@ -140,15 +141,18 @@ export function JobsContent() {
                 type="button"
                 className="search-clear"
                 onClick={() => {
-                  setSearch("")
-                  searchRef.current?.focus()
+                  setSearch("");
+                  searchRef.current?.focus();
                 }}
                 aria-label="Clear search"
               >
                 <Close size={14} />
               </button>
             ) : (
-              <kbd aria-hidden="true">/</kbd>
+              <>
+                {/* biome-ignore lint/a11y/noAriaHiddenOnFocusable: decorative shortcut glyph; the accessible name comes from the sr-only label. */}
+                <kbd aria-hidden="true">/</kbd>
+              </>
             )}
           </label>
         </div>
@@ -185,9 +189,9 @@ export function JobsContent() {
         {filtered.length > 0 ? (
           <ul className="job-list" data-reveal>
             {filtered.map((role) => {
-              const company = companyForRole(role)
-              const meta = roleMeta(role)
-              const ago = postedAgo(role.postedAt)
+              const company = companyForRole(role);
+              const meta = roleMeta(role);
+              const ago = postedAgo(role.postedAt);
               return (
                 <li key={role.id}>
                   <button
@@ -211,7 +215,7 @@ export function JobsContent() {
                     <ArrowRight size={16} className="job-row-arrow" />
                   </button>
                 </li>
-              )
+              );
             })}
           </ul>
         ) : (
@@ -245,5 +249,5 @@ export function JobsContent() {
         <RoleDialog role={selected} onClose={() => setSelected(null)} />
       )}
     </div>
-  )
+  );
 }

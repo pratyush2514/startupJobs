@@ -1,15 +1,14 @@
-import { PageIntro } from "@/components/PageIntro"
-import { FAQ } from "@/components/FAQ"
-import { ArrowUpRight, MapIcon } from "@/components/icons"
-
-import Link from "next/link"
-import type { Metadata } from "next"
-import { siteMeta } from "@/lib/site"
+import type { Metadata } from "next";
+import Link from "next/link";
+import { FAQ } from "@/components/FAQ";
+import { ArrowUpRight, MapIcon } from "@/components/icons";
+import { PageIntro } from "@/components/PageIntro";
+import { siteMeta } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: siteMeta.faq.title,
   description: siteMeta.faq.description,
-}
+};
 
 export default function Faq() {
   return (
@@ -39,5 +38,5 @@ export default function Faq() {
         </Link>
       </section>
     </div>
-  )
+  );
 }

@@ -1,16 +1,16 @@
-import { type Company } from "../data/companies"
-import { CompanyLogo } from "./CompanyLogo"
-import { ArrowRight, ArrowUpRight, Pin } from "./icons"
-import { roleCountForCompany } from "../lib/roles"
+import type { Company } from "../data/companies";
+import { roleCountForCompany } from "../lib/roles";
+import { CompanyLogo } from "./CompanyLogo";
+import { ArrowRight, ArrowUpRight, Pin } from "./icons";
 
 export function DirectoryCard({
   company,
   onSelect,
 }: {
-  company: Company
-  onSelect: (company: Company) => void
+  company: Company;
+  onSelect: (company: Company) => void;
 }) {
-  const openRoles = roleCountForCompany(company.id)
+  const openRoles = roleCountForCompany(company.id);
   return (
     <article className="directory-card">
       <button
@@ -46,5 +46,5 @@ export function DirectoryCard({
         </span>
       </button>
     </article>
-  )
+  );
 }

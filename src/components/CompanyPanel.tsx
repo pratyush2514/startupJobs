@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 /**
  * Right-side panel (bottom sheet on mobile) for the selected map company.
@@ -9,52 +9,47 @@
 
 // A new company always opens on its overview, never on a stale role.
 
-import { useEffect, useRef, useState } from "react"
-import { cities, type Company } from "../data/companies"
-import { CompanyLogo } from "./CompanyLogo"
-import { ArrowUpRight, Close, ExternalLink, Info, Pin } from "./icons"
-import { postedAgo, roleMeta, rolesForCompany, type Role } from "../lib/roles"
-import { RoleDetail } from "./RoleDetail"
-import Link from "next/link"
+import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
+import { type Company, cities } from "../data/companies";
+import { postedAgo, type Role, roleMeta, rolesForCompany } from "../lib/roles";
+import { CompanyLogo } from "./CompanyLogo";
+import { ArrowUpRight, Close, ExternalLink, Info, Pin } from "./icons";
+import { RoleDetail } from "./RoleDetail";
 
 function hostname(url: string) {
   try {
-    return new URL(url).hostname.replace(/^www\./, "")
+    return new URL(url).hostname.replace(/^www\./, "");
   } catch {
-    return "Official website"
+    return "Official website";
   }
 }
 export function CompanyPanel({
   company,
   onClose,
 }: {
-  company: Company
-  onClose: () => void
+  company: Company;
+  onClose: () => void;
 }) {
-  const [activeRole, setActiveRole] = useState<Role | null>(null)
-  const closeRef = useRef(onClose)
-  closeRef.current = onClose
-  const closeButton = useRef<HTMLButtonElement>(null)
-  const city =
-    cities.find(
-      (item) =>
-        item.id ===
-        company.city,
-    ) ??
-    cities[0]
-  const companyRoles = rolesForCompany(company.id)
+  const [activeRole, setActiveRole] = useState<Role | null>(null);
+  const closeRef = useRef(onClose);
+  closeRef.current = onClose;
+  const closeButton = useRef<HTMLButtonElement>(null);
+  const city = cities.find((item) => item.id === company.city) ?? cities[0];
+  const companyRoles = rolesForCompany(company.id);
+  // biome-ignore lint/correctness/useExhaustiveDependencies: company.id is the intentional reset trigger.
   useEffect(() => {
-    setActiveRole(null)
-  }, [company.id])
+    setActiveRole(null);
+  }, [company.id]);
 
   useEffect(() => {
-    closeButton.current?.focus({ preventScroll: true })
+    closeButton.current?.focus({ preventScroll: true });
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") closeRef.current()
-    }
-    window.addEventListener("keydown", onKey)
-    return () => window.removeEventListener("keydown", onKey)
-  }, [])
+      if (event.key === "Escape") closeRef.current();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
 
   return (
     <aside
@@ -105,8 +100,8 @@ export function CompanyPanel({
                 </h3>
                 <ul>
                   {companyRoles.map((role) => {
-                    const meta = roleMeta(role)
-                    const ago = postedAgo(role.postedAt)
+                    const meta = roleMeta(role);
+                    const ago = postedAgo(role.postedAt);
                     return (
                       <li key={role.id}>
                         <button
@@ -127,7 +122,7 @@ export function CompanyPanel({
                           <ArrowUpRight size={15} className="role-row-arrow" />
                         </button>
                       </li>
-                    )
+                    );
                   })}
                 </ul>
               </div>
@@ -165,5 +160,5 @@ export function CompanyPanel({
         )}
       </div>
     </aside>
-  )
+  );
 }

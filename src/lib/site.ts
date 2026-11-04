@@ -43,6 +43,6 @@ export const siteMeta = {
     description:
       "Straight answers about Startup Arena's map, verified directory and careers links.",
   },
-} as const
+} as const;
 
-export type SitePage = keyof typeof siteMeta
+export type SitePage = keyof typeof siteMeta;

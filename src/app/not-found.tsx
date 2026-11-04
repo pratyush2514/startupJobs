@@ -1,10 +1,10 @@
-import type { Metadata } from "next"
-import Link from "next/link"
-import { MapIcon, ArrowUpRight } from "@/components/icons"
+import type { Metadata } from "next";
+import Link from "next/link";
+import { ArrowUpRight, MapIcon } from "@/components/icons";
 
 export const metadata: Metadata = {
   title: "Page not on the atlas — Startup Arena",
-}
+};
 
 export default function NotFound() {
   return (
@@ -27,5 +27,5 @@ export default function NotFound() {
         </Link>
       </div>
     </section>
-  )
+  );
 }

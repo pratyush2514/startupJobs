@@ -1,15 +1,13 @@
-import { PageIntro } from "@/components/PageIntro"
-import { Pricing } from "@/components/Pricing"
-import { FAQ } from "@/components/FAQ"
-
-import Link from "next/link"
-import type { Metadata } from "next"
-import { siteMeta } from "@/lib/site"
+import type { Metadata } from "next";
+import { FAQ } from "@/components/FAQ";
+import { PageIntro } from "@/components/PageIntro";
+import { Pricing } from "@/components/Pricing";
+import { siteMeta } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: siteMeta.pricing.title,
   description: siteMeta.pricing.description,
-}
+};
 
 export default function PricingPage() {
   return (
@@ -31,5 +29,5 @@ export default function PricingPage() {
         candidates to explore.
       </p>
     </div>
-  )
+  );
 }

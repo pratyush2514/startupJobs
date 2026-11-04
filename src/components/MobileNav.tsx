@@ -1,11 +1,11 @@
-"use client"
+"use client";
 
-import { useEffect, useRef } from "react"
-import { Brand } from "./Brand"
-import { ArrowUpRight, ChevronRight, Close, Moon, Sun } from "./icons"
-import { cities, companies } from "../data/companies"
-import { useBodyLock, useMediaQuery } from "../lib/hooks"
-import Link from "next/link"
+import Link from "next/link";
+import { useEffect, useRef } from "react";
+import { cities, companies } from "../data/companies";
+import { useBodyLock, useMediaQuery } from "../lib/hooks";
+import { Brand } from "./Brand";
+import { ArrowUpRight, ChevronRight, Close, Moon, Sun } from "./icons";
 
 const links = [
   {
@@ -44,7 +44,7 @@ const links = [
     label: "Pricing",
     hint: "Free to explore, always",
   },
-]
+];
 
 export function MobileNav({
   open,
@@ -53,38 +53,38 @@ export function MobileNav({
   onClose,
   onToggleTheme,
 }: {
-  open: boolean
-  page: string
-  theme: "dark" | "light"
-  onClose: () => void
-  onToggleTheme: () => void
+  open: boolean;
+  page: string;
+  theme: "dark" | "light";
+  onClose: () => void;
+  onToggleTheme: () => void;
 }) {
-  const dialog = useRef<HTMLDialogElement>(null)
-  const closeRef = useRef(onClose)
-  closeRef.current = onClose
-  const wide = useMediaQuery("(min-width: 901px)")
-  useBodyLock(open)
+  const dialog = useRef<HTMLDialogElement>(null);
+  const closeRef = useRef(onClose);
+  closeRef.current = onClose;
+  const wide = useMediaQuery("(min-width: 901px)");
+  useBodyLock(open);
 
   useEffect(() => {
-    const node = dialog.current
-    if (!node) return
-    if (open && !node.open) node.showModal()
-    if (!open && node.open) node.close()
-  }, [open])
+    const node = dialog.current;
+    if (!node) return;
+    if (open && !node.open) node.showModal();
+    if (!open && node.open) node.close();
+  }, [open]);
 
   useEffect(() => {
-    const node = dialog.current
-    if (!node) return
-    const onNativeClose = () => closeRef.current()
-    node.addEventListener("close", onNativeClose)
-    return () => node.removeEventListener("close", onNativeClose)
-  }, [])
+    const node = dialog.current;
+    if (!node) return;
+    const onNativeClose = () => closeRef.current();
+    node.addEventListener("close", onNativeClose);
+    return () => node.removeEventListener("close", onNativeClose);
+  }, []);
 
   useEffect(() => {
-    if (open && wide) closeRef.current()
-  }, [open, wide])
+    if (open && wide) closeRef.current();
+  }, [open, wide]);
 
-  const activePage = page === "jobs" ? "companies" : page
+  const activePage = page === "jobs" ? "companies" : page;
 
   return (
     <dialog
@@ -92,8 +92,8 @@ export function MobileNav({
       className="nav-dialog"
       aria-label="Site navigation"
       onCancel={(event) => {
-        event.preventDefault()
-        onClose()
+        event.preventDefault();
+        onClose();
       }}
     >
       <div className="nav-dialog-inner">
@@ -159,6 +159,7 @@ export function MobileNav({
               type="button"
               className="button button-secondary"
               onClick={onToggleTheme}
+              suppressHydrationWarning
             >
               {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
               {theme === "dark" ? "Light theme" : "Dark theme"}
@@ -170,5 +171,5 @@ export function MobileNav({
         </div>
       </div>
     </dialog>
-  )
+  );
 }

@@ -1,12 +1,12 @@
-import { Mark } from "./icons"
-import Link from "next/link"
+import Link from "next/link";
+import { Mark } from "./icons";
 
 export function Brand({
   small = false,
   onNavigate,
 }: {
-  small?: boolean
-  onNavigate?: () => void
+  small?: boolean;
+  onNavigate?: () => void;
 }) {
   return (
     <Link
@@ -25,5 +25,5 @@ export function Brand({
         <span className="brand-country">India</span>
       </span>
     </Link>
-  )
+  );
 }

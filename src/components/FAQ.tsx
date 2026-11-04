@@ -1,4 +1,4 @@
-import { faqs } from "../data/companies"
+import { faqs } from "../data/companies";
 
 export function FAQ() {
   return (
@@ -27,5 +27,5 @@ export function FAQ() {
         ))}
       </div>
     </section>
-  )
+  );
 }

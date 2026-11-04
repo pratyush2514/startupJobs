@@ -1,4 +1,5 @@
-"use client"
+"use client";
+
 // The preview map stays fully interactive (drag / touch / double-click),
 // but never hijacks the page's scroll wheel.
 // The marker layer is created by the companies effect below, once the
@@ -13,38 +14,35 @@
 // eslint-disable-next-line react-hooks/exhaustive-deps
 // Selected from the list while its pin sits inside a cluster.
 
-import { useEffect, useRef, useState } from "react"
-import L from "leaflet"
-import "leaflet/dist/leaflet.css"
-import { type City, type Company, companyLogo } from "../data/companies"
-import { monogram, readableOn } from "../lib/utils"
-import { rolesForCompany } from "../lib/roles"
-import { ensureMarkerCluster } from "../lib/markercluster"
-import { useOnline, useSlowConnection } from "../lib/hooks"
-import { SchematicMap } from "./SchematicMap"
-import { Fit, Minus, Pin, Plus, Refresh, WifiOff } from "./icons"
+import L from "leaflet";
+import { useEffect, useRef, useState } from "react";
+import "leaflet/dist/leaflet.css";
+import { type City, type Company, companyLogo } from "../data/companies";
+import { useOnline, useSlowConnection } from "../lib/hooks";
+import { ensureMarkerCluster } from "../lib/markercluster";
+import { rolesForCompany } from "../lib/roles";
+import { monogram, readableOn } from "../lib/utils";
+import { Fit, Minus, Pin, Plus, Refresh, WifiOff } from "./icons";
+import { SchematicMap } from "./SchematicMap";
 
-const INDIA_BOUNDS = L.latLngBounds([6.4, 67.5], [37.3, 97.8])
+const INDIA_BOUNDS = L.latLngBounds([6.4, 67.5], [37.3, 97.8]);
 const TRANSPARENT_TILE =
-  "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs="
+  "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=";
 
-type TileStatus = "loading" | "ready" | "degraded" | "offline" | "paused"
-type Provider = "esri" | "carto"
+type TileStatus = "loading" | "ready" | "degraded" | "offline" | "paused";
+type Provider = "esri" | "carto";
 
 type Props = {
-  city: City
-  companies: Company[]
-  dark: boolean
-  selected?: Company | null
-  onSelect: (company: Company) => void
-  preview?: boolean
-}
+  city: City;
+  companies: Company[];
+  dark: boolean;
+  selected?: Company | null;
+  onSelect: (company: Company) => void;
+  preview?: boolean;
+};
 
 function tileSource(provider: Provider, dark: boolean) {
-  if (
-    provider ===
-    "carto"
-  ) {
+  if (provider === "carto") {
     return {
       url: `https://{s}.basemaps.cartocdn.com/${
         dark ? "dark_all" : "light_all"
@@ -58,9 +56,9 @@ function tileSource(provider: Provider, dark: boolean) {
         errorTileUrl: TRANSPARENT_TILE,
       } satisfies L.TileLayerOptions,
       labels: null,
-    }
+    };
   }
-  const mode = dark ? "Dark" : "Light"
+  const mode = dark ? "Dark" : "Light";
   return {
     url: `https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_${mode}_Gray_Base/MapServer/tile/{z}/{y}/{x}`,
     attribution:
@@ -72,7 +70,7 @@ function tileSource(provider: Provider, dark: boolean) {
       errorTileUrl: TRANSPARENT_TILE,
     } satisfies L.TileLayerOptions,
     labels: `https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_${mode}_Gray_Reference/MapServer/tile/{z}/{y}/{x}`,
-  }
+  };
 }
 
 export default function MapView({
@@ -83,42 +81,37 @@ export default function MapView({
   onSelect,
   preview = false,
 }: Props) {
-  const container = useRef<HTMLDivElement>(null)
-  const map = useRef<L.Map | null>(null)
-  const markers = useRef<L.LayerGroup | null>(null)
-  const markerIndex = useRef(new Map<string, L.Marker>())
-  const lastCity = useRef(city.id)
-  const callback = useRef(onSelect)
-  const selectedRef = useRef(selected)
-  callback.current = onSelect
-  selectedRef.current = selected
+  const container = useRef<HTMLDivElement>(null);
+  const map = useRef<L.Map | null>(null);
+  const markers = useRef<L.LayerGroup | null>(null);
+  const markerIndex = useRef(new Map<string, L.Marker>());
+  const lastCity = useRef(city.id);
+  const callback = useRef(onSelect);
+  const selectedRef = useRef(selected);
+  callback.current = onSelect;
+  selectedRef.current = selected;
 
-  const online = useOnline()
-  const slow = useSlowConnection()
+  const online = useOnline();
+  const slow = useSlowConnection();
   const [allowTiles, setAllowTiles] = useState(
-    () =>
-      typeof navigator ===
-        "undefined" ||
-      (!slow && navigator.onLine),
-  )
-  const [provider, setProvider] = useState<Provider>("esri")
-  const [attempt, setAttempt] = useState(0)
+    () => typeof navigator === "undefined" || (!slow && navigator.onLine),
+  );
+  const [provider, setProvider] = useState<Provider>("esri");
+  const [attempt, setAttempt] = useState(0);
   const [status, setStatus] = useState<TileStatus>(() =>
-    typeof navigator !==
-      "undefined" &&
-    !navigator.onLine
+    typeof navigator !== "undefined" && !navigator.onLine
       ? "offline"
       : slow
         ? "paused"
         : "loading",
-  )
+  );
 
   useEffect(() => {
-    if (!container.current) return
+    if (!container.current) return;
     const instance = L.map(container.current, {
       zoomControl: false,
       attributionControl: true,
-      scrollWheelZoom: preview ? false : true,
+      scrollWheelZoom: !preview,
       dragging: true,
       touchZoom: true,
       doubleClickZoom: true,
@@ -131,106 +124,71 @@ export default function MapView({
       minZoom: 3,
       worldCopyJump: false,
       preferCanvas: true,
-    })
-    instance.attributionControl.setPrefix(false)
+    });
+    instance.attributionControl.setPrefix(false);
     instance.setView([city.lat, city.lng], preview ? 11 : 12, {
       animate: false,
-    })
-    map.current = instance
+    });
+    map.current = instance;
 
     const frame = window.requestAnimationFrame(() => {
-      instance.invalidateSize()
-      fitToCompanies(instance, city, companies, false)
-      lastCity.current = city.id
-      const indiaZoom = instance.getBoundsZoom(INDIA_BOUNDS, true)
-      instance.setMinZoom(
-        Math.max(
-          4,
-          Math.min(
-            indiaZoom +
-              1,
-            6,
-          ),
-        ),
-      )
-    })
+      instance.invalidateSize();
+      fitToCompanies(instance, city, companies, false);
+      lastCity.current = city.id;
+      const indiaZoom = instance.getBoundsZoom(INDIA_BOUNDS, true);
+      instance.setMinZoom(Math.max(4, Math.min(indiaZoom + 1, 6)));
+    });
 
     const observer = new ResizeObserver(() => {
-      instance.invalidateSize()
-    })
-    observer.observe(container.current)
+      instance.invalidateSize();
+    });
+    observer.observe(container.current);
 
     return () => {
-      window.cancelAnimationFrame(frame)
-      observer.disconnect()
-      instance.remove()
-      map.current = null
-      markers.current = null
-      markerIndex.current.clear()
-    }
-  }, [preview])
+      window.cancelAnimationFrame(frame);
+      observer.disconnect();
+      instance.remove();
+      map.current = null;
+      markers.current = null;
+      markerIndex.current.clear();
+    };
+  }, [preview]);
 
   useEffect(() => {
     if (!online) {
-      setStatus("offline")
-      return
+      setStatus("offline");
+      return;
     }
-    if (
-      status ===
-      "offline"
-    ) {
-      setAllowTiles(true)
-      setAttempt(
-        (value) =>
-          value +
-          1,
-      )
+    if (status === "offline") {
+      setAllowTiles(true);
+      setAttempt((value) => value + 1);
     }
-  }, [online])
+  }, [online]);
 
   useEffect(() => {
-    if (!allowTiles) setStatus("paused")
-  }, [allowTiles])
+    if (!allowTiles) setStatus("paused");
+  }, [allowTiles]);
 
   useEffect(() => {
-    const instance = map.current
-    if (!instance || !allowTiles || !online) return
-    let cancelled = false
-    let settled = false
-    let loaded = 0
-    let errors = 0
-    const source = tileSource(provider, dark)
-    const width =
-      container.current?.clientWidth ??
-      900
-    const height =
-      container.current?.clientHeight ??
-      500
+    const instance = map.current;
+    if (!instance || !allowTiles || !online) return;
+    let cancelled = false;
+    let settled = false;
+    let loaded = 0;
+    let errors = 0;
+    const source = tileSource(provider, dark);
+    const width = container.current?.clientWidth ?? 900;
+    const height = container.current?.clientHeight ?? 500;
     const expected =
-      Math.ceil(
-        width /
-          256,
-      ) *
-      Math.ceil(
-        height /
-          256,
-      ) *
-      (provider ===
-      "esri"
-        ? 1
-        : 1)
+      Math.ceil(width / 256) *
+      Math.ceil(height / 256) *
+      (provider === "esri" ? 1 : 1);
     const threshold = Math.min(
       expected,
-      Math.max(
-        3,
-        Math.round(
-          expected *
-            0.4,
-        ),
-      ),
-    )
+      Math.max(3, Math.round(expected * 0.4)),
+    );
 
-    setStatus("loading")
+    setStatus("loading");
 
     const base = L.tileLayer(source.url, {
       ...source.options,
@@ -238,7 +196,7 @@ export default function MapView({
       bounds: INDIA_BOUNDS,
       updateWhenIdle: preview,
       keepBuffer: 2,
-    }).addTo(instance)
+    }).addTo(instance);
 
     const labels = source.labels
       ? L.tileLayer(source.labels, {
@@ -250,98 +208,67 @@ export default function MapView({
           updateWhenIdle: preview,
           keepBuffer: 2,
         }).addTo(instance)
-      : null
+      : null;
 
     const settle = (next: TileStatus) => {
-      if (cancelled || settled) return
-      settled = true
-      setStatus(next)
-    }
+      if (cancelled || settled) return;
+      settled = true;
+      setStatus(next);
+    };
 
     base.on("tileload", () => {
-      if (cancelled) return
-      loaded += 1
-      if (
-        loaded >=
-        threshold
-      )
-        settle("ready")
-    })
+      if (cancelled) return;
+      loaded += 1;
+      if (loaded >= threshold) settle("ready");
+    });
     base.on("tileerror", () => {
-      if (cancelled) return
-      errors += 1
-      if (
-        errors >=
-          4 &&
-        loaded ===
-          0 &&
-        provider ===
-          "esri"
-      ) {
-        setProvider("carto")
+      if (cancelled) return;
+      errors += 1;
+      if (errors >= 4 && loaded === 0 && provider === "esri") {
+        setProvider("carto");
       }
-    })
+    });
 
     const slowTimer = window.setTimeout(() => {
-      if (cancelled || settled) return
-      if (
-        loaded ===
-        0
-      )
-        setStatus("degraded")
-    }, 4200)
+      if (cancelled || settled) return;
+      if (loaded === 0) setStatus("degraded");
+    }, 4200);
 
     const giveUpTimer = window.setTimeout(() => {
-      if (cancelled || settled) return
-      settle(
-        loaded >
-          0
-          ? "ready"
-          : "degraded",
-      )
-    }, 11000)
+      if (cancelled || settled) return;
+      settle(loaded > 0 ? "ready" : "degraded");
+    }, 11000);
 
     return () => {
-      cancelled = true
-      window.clearTimeout(slowTimer)
-      window.clearTimeout(giveUpTimer)
-      base.remove()
-      labels?.remove()
-    }
-  }, [allowTiles, online, dark, provider, attempt, preview])
+      cancelled = true;
+      window.clearTimeout(slowTimer);
+      window.clearTimeout(giveUpTimer);
+      base.remove();
+      labels?.remove();
+    };
+  }, [allowTiles, online, dark, provider, attempt, preview]);
 
   useEffect(() => {
-    const instance = map.current
-    if (!instance) return
+    const instance = map.current;
+    if (!instance) return;
     const fit = () => {
-      instance.invalidateSize()
-      fitToCompanies(
-        instance,
-        city,
-        companies,
-        lastCity.current !==
-          city.id,
-      )
-      lastCity.current = city.id
-    }
-    const frame = window.requestAnimationFrame(fit)
-    return () => window.cancelAnimationFrame(frame)
-  }, [city.id])
+      instance.invalidateSize();
+      fitToCompanies(instance, city, companies, lastCity.current !== city.id);
+      lastCity.current = city.id;
+    };
+    const frame = window.requestAnimationFrame(fit);
+    return () => window.cancelAnimationFrame(frame);
+  }, [city.id]);
 
   useEffect(() => {
-    const instance = map.current
-    if (!instance) return
-    let cancelled = false
-    ;(async () => {
-      await ensureMarkerCluster(L)
-      if (
-        cancelled ||
-        map.current !==
-          instance
-      )
-        return
+    const instance = map.current;
+    if (!instance) return;
+    let cancelled = false;
+    (async () => {
+      await ensureMarkerCluster(L);
+      if (cancelled || map.current !== instance) return;
 
-      let group = markers.current
+      let group = markers.current;
       if (!group) {
         const cluster = L.markerClusterGroup({
           maxClusterRadius: 56,
@@ -350,125 +277,96 @@ export default function MapView({
           spiderfyOnMaxZoom: true,
           disableClusteringAtZoom: 16,
           iconCreateFunction: (child: L.MarkerCluster) => {
-            const count = child.getChildCount()
-            const size =
-              count <
-              10
-                ? "s"
-                : count <
-                    30
-                  ? "m"
-                  : "l"
-            const px =
-              size ===
-              "s"
-                ? 42
-                : size ===
-                    "m"
-                  ? 52
-                  : 62
+            const count = child.getChildCount();
+            const size = count < 10 ? "s" : count < 30 ? "m" : "l";
+            const px = size === "s" ? 42 : size === "m" ? 52 : 62;
             return L.divIcon({
               html: `<div class="cluster-bubble" data-size="${size}"><span>${count}</span></div>`,
               className: "cluster-icon",
               iconSize: [px, px],
-              iconAnchor: [
-                px /
-                  2,
-                px /
-                  2,
-              ],
-            })
+              iconAnchor: [px / 2, px / 2],
+            });
           },
-        })
-        cluster.addTo(instance)
-        group = cluster
-        markers.current = cluster
+        });
+        cluster.addTo(instance);
+        group = cluster;
+        markers.current = cluster;
       }
 
-      group.clearLayers()
-      markerIndex.current.clear()
+      group.clearLayers();
+      markerIndex.current.clear();
 
       companies.forEach((company) => {
-        const logo = companyLogo(company)
-        const element = document.createElement("div")
-        element.className =
-          "map-pin" +
-          (logo ? " has-logo" : "")
-        element.style.setProperty("--pin", company.color)
-        element.style.setProperty("--pin-ink", readableOn(company.color))
-        const body = document.createElement("span")
-        body.className = "map-pin-body"
+        const logo = companyLogo(company);
+        const element = document.createElement("div");
+        element.className = `map-pin${logo ? " has-logo" : ""}`;
+        element.style.setProperty("--pin", company.color);
+        element.style.setProperty("--pin-ink", readableOn(company.color));
+        const body = document.createElement("span");
+        body.className = "map-pin-body";
         if (logo) {
-          const img = document.createElement("img")
-          img.src = logo
-          img.alt = ""
-          img.loading = "lazy"
-          img.decoding = "async"
-          img.draggable = false
+          const img = document.createElement("img");
+          img.src = logo;
+          img.alt = "";
+          img.loading = "lazy";
+          img.decoding = "async";
+          img.draggable = false;
           img.onerror = () => {
-            element.classList.remove("has-logo")
+            element.classList.remove("has-logo");
             body.replaceChildren(
               document.createTextNode(monogram(company.name)),
-            )
-          }
-          body.append(img)
+            );
+          };
+          body.append(img);
         } else {
-          body.textContent = monogram(company.name)
+          body.textContent = monogram(company.name);
         }
-        const tail = document.createElement("span")
-        tail.className = "map-pin-tail"
-        element.append(body, tail)
+        const tail = document.createElement("span");
+        tail.className = "map-pin-tail";
+        element.append(body, tail);
 
         const icon = L.divIcon({
           html: element,
           className: "map-pin-icon",
           iconSize: [42, 50],
           iconAnchor: [21, 48],
-        })
+        });
 
-        const place =
-          company.area ??
-          city.name
+        const place = company.area ?? city.name;
         const marker = L.marker([company.lat, company.lng], {
           icon,
           keyboard: true,
           riseOnHover: true,
           title: `${company.name}, ${place}`,
           alt: `${company.name}, ${place}`,
-        })
+        });
 
-        const tooltip = document.createElement("div")
-        tooltip.className = "map-tooltip-content"
-        const name = document.createElement("strong")
-        name.textContent = company.name
-        const area = document.createElement("span")
-        area.textContent = `${place} · ${company.category}`
-        tooltip.append(name, area)
+        const tooltip = document.createElement("div");
+        tooltip.className = "map-tooltip-content";
+        const name = document.createElement("strong");
+        name.textContent = company.name;
+        const area = document.createElement("span");
+        area.textContent = `${place} · ${company.category}`;
+        tooltip.append(name, area);
 
-        const companyRoles = rolesForCompany(company.id)
-        if (
-          companyRoles.length >
-          0
-        ) {
-          const rolesHead = document.createElement("span")
-          rolesHead.className = "map-tooltip-roles-head"
+        const companyRoles = rolesForCompany(company.id);
+        if (companyRoles.length > 0) {
+          const rolesHead = document.createElement("span");
+          rolesHead.className = "map-tooltip-roles-head";
           rolesHead.textContent = `${companyRoles.length} open role${
-            companyRoles.length ===
-            1
-              ? ""
-              : "s"
-          }`
-          tooltip.append(rolesHead)
+            companyRoles.length === 1 ? "" : "s"
+          }`;
+          tooltip.append(rolesHead);
           for (const role of companyRoles.slice(0, 2)) {
-            const row = document.createElement("span")
-            row.className = "map-tooltip-role"
-            row.textContent = role.title
-            tooltip.append(row)
+            const row = document.createElement("span");
+            row.className = "map-tooltip-role";
+            row.textContent = role.title;
+            tooltip.append(row);
           }
-          const hint = document.createElement("span")
-          hint.className = "map-tooltip-hint"
-          hint.textContent = "Click the pin for all roles"
-          tooltip.append(hint)
+          const hint = document.createElement("span");
+          hint.className = "map-tooltip-hint";
+          hint.textContent = "Click the pin for all roles";
+          tooltip.append(hint);
         }
 
         marker.bindTooltip(tooltip, {
@@ -476,73 +374,72 @@ export default function MapView({
           offset: [0, -38],
           opacity: 1,
           className: "map-tooltip",
-        })
-        marker.on("click", () => callback.current(company))
-        marker.addTo(group)
-        markerIndex.current.set(company.id, marker)
-      })
+        });
+        marker.on("click", () => callback.current(company));
+        marker.addTo(group);
+        markerIndex.current.set(company.id, marker);
+      });
 
-      const current = selectedRef.current
+      const current = selectedRef.current;
       if (current) {
-        const marker = markerIndex.current.get(current.id)
+        const marker = markerIndex.current.get(current.id);
         if (marker) {
-          marker.setZIndexOffset(900)
+          marker.setZIndexOffset(900);
           if (marker.getElement()) {
-            marker.getElement()?.classList.add("is-selected")
+            marker.getElement()?.classList.add("is-selected");
           } else {
-            ;(group as L.MarkerClusterGroup).zoomToShowLayer(marker, () => {
-              marker.getElement()?.classList.add("is-selected")
-            })
+            (group as L.MarkerClusterGroup).zoomToShowLayer(marker, () => {
+              marker.getElement()?.classList.add("is-selected");
+            });
           }
         }
       }
-    })()
+    })();
 
     return () => {
-      cancelled = true
-    }
-  }, [companies])
+      cancelled = true;
+    };
+  }, [companies]);
 
   useEffect(() => {
-    const group = markers.current as L.MarkerClusterGroup | null
+    const group = markers.current as L.MarkerClusterGroup | null;
     markerIndex.current.forEach((marker, id) => {
-      const active =
-        selected?.id ===
-        id
-      marker.setZIndexOffset(active ? 900 : 0)
-      const element = marker.getElement()
+      const active = selected?.id === id;
+      marker.setZIndexOffset(active ? 900 : 0);
+      const element = marker.getElement();
       if (element) {
-        element.classList.toggle("is-selected", active)
+        element.classList.toggle("is-selected", active);
       } else if (active && group) {
         group.zoomToShowLayer(marker, () => {
-          marker.getElement()?.classList.add("is-selected")
-        })
+          marker.getElement()?.classList.add("is-selected");
+        });
       }
-    })
-  }, [selected])
+    });
+  }, [selected]);
 
   const retry = () => {
-    setAllowTiles(true)
-    setProvider((current) => (current === "esri" ? "carto" : "esri"))
-    setAttempt((value) => value + 1)
-  }
+    setAllowTiles(true);
+    setProvider((current) => (current === "esri" ? "carto" : "esri"));
+    setAttempt((value) => value + 1);
+  };
 
   const loadTiles = () => {
-    setAllowTiles(true)
-    setAttempt((value) => value + 1)
-  }
+    setAllowTiles(true);
+    setAttempt((value) => value + 1);
+  };
 
   const fitResults = () => {
-    if (map.current) fitToCompanies(map.current, city, companies, true)
-  }
+    if (map.current) fitToCompanies(map.current, city, companies, true);
+  };
 
-  const ready = status === "ready"
+  const ready = status === "ready";
 
   return (
     <div className={`map-shell${preview ? " is-preview" : ""}`}>
       <div
         className="leaflet-canvas"
         ref={container}
+        role="application"
         aria-label={`Interactive map of ${city.name}`}
       />
 
@@ -576,7 +473,7 @@ export default function MapView({
       )}
 
       {ready && (
-        <div className="map-controls" aria-label="Map controls">
+        <div className="map-controls" role="group" aria-label="Map controls">
           <button
             type="button"
             onClick={() => map.current?.zoomIn(0.5)}
@@ -641,7 +538,7 @@ export default function MapView({
         </div>
       )}
     </div>
-  )
+  );
 }
 
 function fitToCompanies(
@@ -651,22 +548,22 @@ function fitToCompanies(
   animate: boolean,
 ) {
   if (companies.length === 0) {
-    instance.flyTo([city.lat, city.lng], 12, { duration: animate ? 0.6 : 0 })
-    return
+    instance.flyTo([city.lat, city.lng], 12, { duration: animate ? 0.6 : 0 });
+    return;
   }
   if (companies.length === 1) {
     instance.flyTo([companies[0].lat, companies[0].lng], 13, {
       duration: animate ? 0.6 : 0,
-    })
-    return
+    });
+    return;
   }
   const bounds = L.latLngBounds(
     companies.map((company) => [company.lat, company.lng] as L.LatLngTuple),
-  ).pad(0.22)
+  ).pad(0.22);
   instance.flyToBounds(bounds, {
     maxZoom: 13,
     duration: animate ? 0.65 : 0,
     paddingTopLeft: [12, 36],
     paddingBottomRight: [12, 36],
-  })
+  });
 }

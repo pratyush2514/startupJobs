@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 /**
  * The rich role body: fact grid, description, apply action.
@@ -6,65 +6,65 @@
  * modal — the shell differs, the content is one place.
  */
 
-import { useEffect, useState, type ReactNode } from "react"
-import { cities } from "../data/companies"
-import { CompanyLogo } from "./CompanyLogo"
-import { ArrowLeft, ExternalLink, Info, Pin } from "./icons"
+import { type ReactNode, useEffect, useState } from "react";
+import { cities } from "../data/companies";
 import {
   companyForRole,
   loadRoleDescription,
   postedAgo,
   postedExact,
   type Role,
-} from "../lib/roles"
+} from "../lib/roles";
+import { CompanyLogo } from "./CompanyLogo";
+import { ArrowLeft, ExternalLink, Info, Pin } from "./icons";
 
 function hostname(url: string) {
   try {
-    return new URL(url).hostname.replace(/^www\./, "")
+    return new URL(url).hostname.replace(/^www\./, "");
   } catch {
-    return "Official website"
+    return "Official website";
   }
 }
 
 function workModeLabel(mode: Role["workMode"]): string | null {
-  if (mode === "remote") return "Remote"
-  if (mode === "hybrid") return "Hybrid"
-  if (mode === "onsite") return "On-site"
-  return null
+  if (mode === "remote") return "Remote";
+  if (mode === "hybrid") return "Hybrid";
+  if (mode === "onsite") return "On-site";
+  return null;
 }
 export function RoleDetail({
   role,
   onBack,
 }: {
-  role: Role
-  onBack?: () => void
+  role: Role;
+  onBack?: () => void;
 }) {
-  const company = companyForRole(role)
-  const city = cities.find((item) => item.id === role.city)
-  const ago = postedAgo(role.postedAt)
-  const exact = postedExact(role.postedAt)
-  const mode = workModeLabel(role.workMode)
+  const company = companyForRole(role);
+  const city = cities.find((item) => item.id === role.city);
+  const ago = postedAgo(role.postedAt);
+  const exact = postedExact(role.postedAt);
+  const mode = workModeLabel(role.workMode);
 
-  const [description, setDescription] = useState<string | null>(null)
-  const [descReady, setDescReady] = useState(false)
+  const [description, setDescription] = useState<string | null>(null);
+  const [descReady, setDescReady] = useState(false);
 
   useEffect(() => {
-    let live = true
-    setDescription(null)
-    setDescReady(false)
+    let live = true;
+    setDescription(null);
+    setDescReady(false);
     loadRoleDescription(role.id).then((text) => {
-      if (!live) return
-      setDescription(text)
-      setDescReady(true)
-    })
+      if (!live) return;
+      setDescription(text);
+      setDescReady(true);
+    });
     return () => {
-      live = false
-    }
-  }, [role.id])
+      live = false;
+    };
+  }, [role.id]);
 
-  const facts: { label: string; value: ReactNode }[] = []
-  if (role.team) facts.push({ label: "Team", value: role.team })
-  if (role.level) facts.push({ label: "Level", value: role.level })
+  const facts: { label: string; value: ReactNode }[] = [];
+  if (role.team) facts.push({ label: "Team", value: role.team });
+  if (role.level) facts.push({ label: "Level", value: role.level });
   if (role.location)
     facts.push({
       label: "Location",
@@ -73,13 +73,13 @@ export function RoleDetail({
           <Pin size={12} /> {role.location}
         </>
       ),
-    })
-  if (mode) facts.push({ label: "Work mode", value: mode })
+    });
+  if (mode) facts.push({ label: "Work mode", value: mode });
   if (exact || ago)
     facts.push({
       label: "Posted",
       value: exact ?? ago,
-    })
+    });
 
   return (
     <div className="role-detail">
@@ -145,5 +145,5 @@ export function RoleDetail({
         </p>
       </div>
     </div>
-  )
+  );
 }

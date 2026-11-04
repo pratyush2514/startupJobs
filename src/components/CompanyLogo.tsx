@@ -1,23 +1,23 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { type Company, companyLogo } from "../data/companies"
-import { initials, readableOn } from "../lib/utils"
+import { useState } from "react";
+import { type Company, companyLogo } from "../data/companies";
+import { initials, readableOn } from "../lib/utils";
 
-type Size = "sm" | "md" | "lg"
+type Size = "sm" | "md" | "lg";
 
 export function CompanyLogo({
   company,
   size = "md",
   className = "",
 }: {
-  company: Company
-  size?: Size
-  className?: string
+  company: Company;
+  size?: Size;
+  className?: string;
 }) {
-  const [loaded, setLoaded] = useState(false)
-  const [failed, setFailed] = useState(false)
-  const src = companyLogo(company)
+  const [loaded, setLoaded] = useState(false);
+  const [failed, setFailed] = useState(false);
+  const src = companyLogo(company);
 
   return (
     <span
@@ -45,5 +45,5 @@ export function CompanyLogo({
         />
       )}
     </span>
-  )
+  );
 }

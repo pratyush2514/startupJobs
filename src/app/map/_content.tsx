@@ -1,12 +1,10 @@
-"use client"
+"use client";
 
-import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react"
-import Link from "next/link"
-import { useSearchParams } from "next/navigation"
-import { cities, companies, type Company } from "@/data/companies"
-import { CompanyLogo } from "@/components/CompanyLogo"
-import { MapCanvas } from "@/components/MapCanvas"
-import { DirectoryCard } from "@/components/DirectoryCard"
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
+import { CompanyLogo } from "@/components/CompanyLogo";
+import { DirectoryCard } from "@/components/DirectoryCard";
 import {
   ArrowRight,
   ArrowUpRight,
@@ -19,80 +17,83 @@ import {
   Pin,
   Search,
   Sliders,
-} from "@/components/icons"
-import { useSearchShortcut } from "@/lib/hooks"
-import { useSelectCompany } from "@/components/Shell"
-import { useThemeContext } from "@/components/theme"
-import { cityFromParam, getLastCity, setLastCity } from "@/lib/city"
-import { plural } from "@/lib/utils"
+} from "@/components/icons";
+import { MapCanvas } from "@/components/MapCanvas";
+import { useSelectCompany } from "@/components/Shell";
+import { useThemeContext } from "@/components/theme";
+import { type Company, cities, companies } from "@/data/companies";
+import { cityFromParam, getLastCity, setLastCity } from "@/lib/city";
+import { useSearchShortcut } from "@/lib/hooks";
+import { plural } from "@/lib/utils";
 
-type View = "map" | "list"
+type View = "map" | "list";
 
 function countIn(list: Company[], area: string) {
-  return list.filter((company) => company.area === area).length
+  return list.filter((company) => company.area === area).length;
 }
 
 export function MapContent() {
-  const searchParams = useSearchParams()
-  const { theme } = useThemeContext()
-  const onSelect = useSelectCompany()
+  const searchParams = useSearchParams();
+  const { theme } = useThemeContext();
+  const onSelect = useSelectCompany();
   const [cityId, setCityId] = useState(
     () =>
       cityFromParam(searchParams.get("city")) ?? getLastCity() ?? "bengaluru",
-  )
-  const city = cities.find((item) => item.id === cityId) ?? cities[0]
+  );
+  const city = cities.find((item) => item.id === cityId) ?? cities[0];
   const allCityCompanies = useMemo(
     () => companies.filter((company) => company.city === city.id),
     [city.id],
-  )
-  const [search, setSearch] = useState("")
-  const deferredSearch = useDeferredValue(search)
-  const [area, setArea] = useState("All areas")
-  const [category, setCategory] = useState("All industries")
-  const [filtersOpen, setFiltersOpen] = useState(false)
-  const [view, setView] = useState<View>("map")
-  const searchRef = useRef<HTMLInputElement>(null)
-  const filtersRef = useRef<HTMLDivElement>(null)
-  const filtersButton = useRef<HTMLButtonElement>(null)
-  useSearchShortcut(() => searchRef.current?.focus())
+  );
+  const [search, setSearch] = useState("");
+  const deferredSearch = useDeferredValue(search);
+  const [area, setArea] = useState("All areas");
+  const [category, setCategory] = useState("All industries");
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [view, setView] = useState<View>("map");
+  const searchRef = useRef<HTMLInputElement>(null);
+  const filtersRef = useRef<HTMLDivElement>(null);
+  const filtersButton = useRef<HTMLButtonElement>(null);
+  useSearchShortcut(() => searchRef.current?.focus());
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: cityId is the intentional reset trigger.
+  useEffect(() => {
+    setSearch("");
+    setArea("All areas");
+    setFiltersOpen(false);
+  }, [cityId]);
 
   useEffect(() => {
-    setSearch("")
-    setArea("All areas")
-    setFiltersOpen(false)
-  }, [cityId])
-
-  useEffect(() => {
-    setLastCity(cityId)
-    const next = `/map?city=${cityId}`
+    setLastCity(cityId);
+    const next = `/map?city=${cityId}`;
     if (window.location.pathname + window.location.search !== next) {
-      window.history.replaceState(null, "", next)
+      window.history.replaceState(null, "", next);
     }
-    document.title = `Explore ${city.name} — Startup Arena India`
-  }, [cityId, city.name])
+    document.title = `Explore ${city.name} — Startup Arena India`;
+  }, [cityId, city.name]);
 
   useEffect(() => {
-    if (!filtersOpen) return
+    if (!filtersOpen) return;
     const onPointerDown = (event: MouseEvent) => {
-      const target = event.target as Node
+      const target = event.target as Node;
       if (
         filtersRef.current?.contains(target) ||
         filtersButton.current?.contains(target)
       ) {
-        return
+        return;
       }
-      setFiltersOpen(false)
-    }
+      setFiltersOpen(false);
+    };
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setFiltersOpen(false)
-    }
-    document.addEventListener("mousedown", onPointerDown)
-    document.addEventListener("keydown", onKey)
+      if (event.key === "Escape") setFiltersOpen(false);
+    };
+    document.addEventListener("mousedown", onPointerDown);
+    document.addEventListener("keydown", onKey);
     return () => {
-      document.removeEventListener("mousedown", onPointerDown)
-      document.removeEventListener("keydown", onKey)
-    }
-  }, [filtersOpen])
+      document.removeEventListener("mousedown", onPointerDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [filtersOpen]);
 
   const industries = useMemo(
     () => [
@@ -100,39 +101,40 @@ export function MapContent() {
       ...Array.from(new Set(allCityCompanies.map((c) => c.category))).sort(),
     ],
     [allCityCompanies],
-  )
+  );
 
   const filtered = useMemo(() => {
-    const term = deferredSearch.trim().toLowerCase()
+    const term = deferredSearch.trim().toLowerCase();
     return allCityCompanies.filter((company) => {
       const haystack =
-        `${company.name} ${company.area ?? ""} ${company.category}`.toLowerCase()
+        `${company.name} ${company.area ?? ""} ${company.category}`.toLowerCase();
       return (
         (!term || haystack.includes(term)) &&
         (area === "All areas" || company.area === area) &&
         (category === "All industries" || company.category === category)
-      )
-    })
-  }, [allCityCompanies, deferredSearch, area, category])
+      );
+    });
+  }, [allCityCompanies, deferredSearch, area, category]);
 
-  const hasFilters = area !== "All areas" || category !== "All industries"
+  const hasFilters = area !== "All areas" || category !== "All industries";
   const filterCount =
-    Number(area !== "All areas") + Number(category !== "All industries")
+    Number(area !== "All areas") + Number(category !== "All industries");
 
   const clearFilters = () => {
-    setArea("All areas")
-    setCategory("All industries")
-  }
+    setArea("All areas");
+    setCategory("All industries");
+  };
 
   const clearEverything = () => {
-    clearFilters()
-    setSearch("")
-  }
+    clearFilters();
+    setSearch("");
+  };
 
-  const chooseCity = (id: string) => setCityId(id)
+  const chooseCity = (id: string) => setCityId(id);
 
   return (
-    <div className={`explorer view-${view}`}>
+    <div className={`explorer view-${view}`} suppressHydrationWarning>
+      {/* City is client-only state (URL query / localStorage); the static prerender uses the default. Suppress the expected mismatch — the client value wins. */}
       <aside
         className="explorer-sidebar"
         aria-label="Company filters and results"
@@ -187,15 +189,18 @@ export function MapContent() {
                   type="button"
                   className="search-clear"
                   onClick={() => {
-                    setSearch("")
-                    searchRef.current?.focus()
+                    setSearch("");
+                    searchRef.current?.focus();
                   }}
                   aria-label="Clear search"
                 >
                   <Close size={14} />
                 </button>
               ) : (
-                <kbd aria-hidden="true">/</kbd>
+                <>
+                  {/* biome-ignore lint/a11y/noAriaHiddenOnFocusable: decorative shortcut glyph; the accessible name comes from the sr-only label. */}
+                  <kbd aria-hidden="true">/</kbd>
+                </>
               )}
             </label>
 
@@ -274,7 +279,11 @@ export function MapContent() {
             )}
 
             {(hasFilters || search) && (
-              <div className="active-filters" aria-label="Active filters">
+              <div
+                className="active-filters"
+                role="group"
+                aria-label="Active filters"
+              >
                 {search && (
                   <button type="button" onClick={() => setSearch("")}>
                     &ldquo;{search}&rdquo; <Close size={12} />
@@ -435,5 +444,5 @@ export function MapContent() {
         )}
       </div>
     </div>
-  )
+  );
 }

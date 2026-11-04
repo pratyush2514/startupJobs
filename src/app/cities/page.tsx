@@ -1,20 +1,19 @@
-import { cities, companies } from "@/data/companies"
-import { PageIntro } from "@/components/PageIntro"
-import { CitySection } from "@/components/CitySection"
-import { ArrowUpRight, Globe, MapIcon, Pin } from "@/components/icons"
-import { plural } from "@/lib/utils"
-
-import Link from "next/link"
-import type { Metadata } from "next"
-import { siteMeta } from "@/lib/site"
+import type { Metadata } from "next";
+import Link from "next/link";
+import { CitySection } from "@/components/CitySection";
+import { ArrowUpRight, Globe, MapIcon, Pin } from "@/components/icons";
+import { PageIntro } from "@/components/PageIntro";
+import { cities, companies } from "@/data/companies";
+import { siteMeta } from "@/lib/site";
+import { plural } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: siteMeta.cities.title,
   description: siteMeta.cities.description,
-}
+};
 
 export default function Cities() {
-  const neighbourhoods = new Set(companies.map((company) => company.area)).size
+  const neighbourhoods = new Set(companies.map((company) => company.area)).size;
 
   return (
     <div className="inner-page">
@@ -75,5 +74,5 @@ export default function Cities() {
         Office locations are approximate
       </p>
     </div>
-  )
+  );
 }

@@ -1,15 +1,14 @@
-import { PageIntro } from "@/components/PageIntro"
-import { HowItWorks } from "@/components/HowItWorks"
-import { ArrowUpRight, Check, Globe, MapIcon, Pin } from "@/components/icons"
-
-import Link from "next/link"
-import type { Metadata } from "next"
-import { siteMeta } from "@/lib/site"
+import type { Metadata } from "next";
+import Link from "next/link";
+import { HowItWorks } from "@/components/HowItWorks";
+import { ArrowUpRight, Check, Globe, MapIcon, Pin } from "@/components/icons";
+import { PageIntro } from "@/components/PageIntro";
+import { siteMeta } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: siteMeta.about.title,
   description: siteMeta.about.description,
-}
+};
 
 const principles = [
   {
@@ -27,7 +26,7 @@ const principles = [
     title: "One country, eight doors",
     body: "Bengaluru is not the whole story. Neither is Delhi, Mumbai or any single city. The map keeps the whole country in view.",
   },
-]
+];
 
 export default function About() {
   return (
@@ -112,5 +111,5 @@ export default function About() {
         </Link>
       </section>
     </div>
-  )
+  );
 }

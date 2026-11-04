@@ -1,8 +1,8 @@
-import { cities, companies } from "../data/companies"
-import { ArrowRight, ArrowUpRight, Pin } from "./icons"
-import { CitySkyline } from "./CitySkyline"
-import { plural } from "../lib/utils"
-import Link from "next/link"
+import Link from "next/link";
+import { cities, companies } from "../data/companies";
+import { plural } from "../lib/utils";
+import { CitySkyline } from "./CitySkyline";
+import { ArrowRight, ArrowUpRight, Pin } from "./icons";
 
 const codes: Record<string, string> = {
   bengaluru: "BLR",
@@ -13,10 +13,10 @@ const codes: Record<string, string> = {
   chennai: "MAA",
   ahmedabad: "AMD",
   kolkata: "CCU",
-}
+};
 
 export function CitySection({ full = false }: { full?: boolean }) {
-  const visible = full ? cities : cities.slice(0, 4)
+  const visible = full ? cities : cities.slice(0, 4);
   return (
     <section
       className={`section cities-section container${full ? " is-full" : ""}`}
@@ -39,7 +39,7 @@ export function CitySection({ full = false }: { full?: boolean }) {
         {visible.map((city, index) => {
           const count = companies.filter(
             (company) => company.city === city.id,
-          ).length
+          ).length;
           return (
             <Link
               href={`/map?city=${city.id}`}
@@ -74,9 +74,9 @@ export function CitySection({ full = false }: { full?: boolean }) {
                 <ArrowRight size={14} />
               </div>
             </Link>
-          )
+          );
         })}
       </div>
     </section>
-  )
+  );
 }

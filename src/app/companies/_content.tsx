@@ -1,11 +1,9 @@
-"use client"
+"use client";
 
-import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react"
-import Link from "next/link"
-import { useSearchParams } from "next/navigation"
-import { cities, companies } from "@/data/companies"
-import { PageIntro } from "@/components/PageIntro"
-import { DirectoryCard } from "@/components/DirectoryCard"
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
+import { DirectoryCard } from "@/components/DirectoryCard";
 import {
   ArrowRight,
   ArrowUpRight,
@@ -13,39 +11,41 @@ import {
   Close,
   MapIcon,
   Search,
-} from "@/components/icons"
-import { cityFromParam, getLastCity, setLastCity } from "@/lib/city"
-import { useSearchShortcut } from "@/lib/hooks"
-import { useSelectCompany } from "@/components/Shell"
-import { plural } from "@/lib/utils"
+} from "@/components/icons";
+import { PageIntro } from "@/components/PageIntro";
+import { useSelectCompany } from "@/components/Shell";
+import { cities, companies } from "@/data/companies";
+import { cityFromParam, getLastCity, setLastCity } from "@/lib/city";
+import { useSearchShortcut } from "@/lib/hooks";
+import { plural } from "@/lib/utils";
 
 export function CompaniesContent() {
-  const searchParams = useSearchParams()
-  const onSelect = useSelectCompany()
+  const searchParams = useSearchParams();
+  const onSelect = useSelectCompany();
   const [cityId, setCityId] = useState(
     () =>
       cityFromParam(searchParams.get("city")) ?? getLastCity() ?? "bengaluru",
-  )
-  const city = cities.find((item) => item.id === cityId) ?? cities[0]
-  const [search, setSearch] = useState("")
-  const deferredSearch = useDeferredValue(search)
-  const [category, setCategory] = useState("All industries")
-  const searchRef = useRef<HTMLInputElement>(null)
-  useSearchShortcut(() => searchRef.current?.focus())
+  );
+  const city = cities.find((item) => item.id === cityId) ?? cities[0];
+  const [search, setSearch] = useState("");
+  const deferredSearch = useDeferredValue(search);
+  const [category, setCategory] = useState("All industries");
+  const searchRef = useRef<HTMLInputElement>(null);
+  useSearchShortcut(() => searchRef.current?.focus());
 
   useEffect(() => {
-    setLastCity(cityId)
-    const next = `/companies?city=${cityId}`
+    setLastCity(cityId);
+    const next = `/companies?city=${cityId}`;
     if (window.location.pathname + window.location.search !== next) {
-      window.history.replaceState(null, "", next)
+      window.history.replaceState(null, "", next);
     }
-    document.title = `Companies in ${city.name} — Startup Arena`
-  }, [cityId, city.name])
+    document.title = `Companies in ${city.name} — Startup Arena`;
+  }, [cityId, city.name]);
 
   const cityCompanies = useMemo(
     () => companies.filter((company) => company.city === city.id),
     [city.id],
-  )
+  );
 
   const industries = useMemo(
     () => [
@@ -53,27 +53,28 @@ export function CompaniesContent() {
       ...Array.from(new Set(cityCompanies.map((c) => c.category))).sort(),
     ],
     [cityCompanies],
-  )
+  );
 
   const filtered = useMemo(() => {
-    const term = deferredSearch.trim().toLowerCase()
+    const term = deferredSearch.trim().toLowerCase();
     return cityCompanies.filter((company) => {
       const haystack =
-        `${company.name} ${company.area ?? ""} ${company.category}`.toLowerCase()
+        `${company.name} ${company.area ?? ""} ${company.category}`.toLowerCase();
       return (
         (!term || haystack.includes(term)) &&
         (category === "All industries" || company.category === category)
-      )
-    })
-  }, [cityCompanies, deferredSearch, category])
+      );
+    });
+  }, [cityCompanies, deferredSearch, category]);
 
   const clearAll = () => {
-    setSearch("")
-    setCategory("All industries")
-  }
+    setSearch("");
+    setCategory("All industries");
+  };
 
   return (
-    <div className="inner-page directory-page">
+    <div className="inner-page directory-page" suppressHydrationWarning>
+      {/* City is client-only state (URL query / localStorage); the static prerender uses the default. Suppress the expected mismatch — the client value wins. */}
       <PageIntro
         kicker="The teams building tomorrow"
         title={
@@ -118,15 +119,18 @@ export function CompaniesContent() {
                 type="button"
                 className="search-clear"
                 onClick={() => {
-                  setSearch("")
-                  searchRef.current?.focus()
+                  setSearch("");
+                  searchRef.current?.focus();
                 }}
                 aria-label="Clear search"
               >
                 <Close size={14} />
               </button>
             ) : (
-              <kbd aria-hidden="true">/</kbd>
+              <>
+                {/* biome-ignore lint/a11y/noAriaHiddenOnFocusable: decorative shortcut glyph; the accessible name comes from the sr-only label. */}
+                <kbd aria-hidden="true">/</kbd>
+              </>
             )}
           </label>
           <Link
@@ -197,5 +201,5 @@ export function CompaniesContent() {
         </div>
       </section>
     </div>
-  )
+  );
 }

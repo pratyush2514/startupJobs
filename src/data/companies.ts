@@ -7,14 +7,14 @@
    companies without a fetched logo render a monogram tile. */
 
 export type City = {
-  id: string
-  name: string
-  state: string
-  tagline: string
-  lat: number
-  lng: number
-  areas: string[]
-}
+  id: string;
+  name: string;
+  state: string;
+  tagline: string;
+  lat: number;
+  lng: number;
+  areas: string[];
+};
 export const cities: City[] = [
   {
     id: "bengaluru",
@@ -112,25 +112,25 @@ export const cities: City[] = [
     lng: 88.433,
     areas: ["Salt Lake Sector V (Bidhannagar)", "Jadavpur"],
   },
-]
+];
 
 export type Company = {
-  id: string
-  name: string
-  slug: string
-  color: string
+  id: string;
+  name: string;
+  slug: string;
+  color: string;
   /** Official careers page URL (verified). */
-  url: string
+  url: string;
   /** Brand domain, used for the logo lookup. */
-  domain: string
-  city: string
+  domain: string;
+  city: string;
   /** Verified office locality, or null when unknown. */
-  area: string | null
-  lat: number
-  lng: number
+  area: string | null;
+  lat: number;
+  lng: number;
   /** Real sector from the research report (or verified by search). */
-  category: string
-}
+  category: string;
+};
 export const companies: Company[] = [
   {
     id: "bengaluru-razorpay",
@@ -938,7 +938,7 @@ export const companies: Company[] = [
     lng: 77.6872,
     category: "Communications API",
   },
-]
+];
 /** Local logo files fetched 2026-11-01 (unavatar + favicon services).
     Slugs absent here render the monogram fallback. */
 const logoFiles: Record<string, string> = {
@@ -994,10 +994,10 @@ const logoFiles: Record<string, string> = {
   zepto: "/logos/zepto.svg",
   zoho: "/logos/zoho.svg",
   zomato: "/logos/zomato.svg",
-}
+};
 /** Local logo path for a company, or null when it should monogram. */
 export const companyLogo = (company: Company): string | null =>
-  logoFiles[company.slug] ?? null
+  logoFiles[company.slug] ?? null;
 
 export const faqs = [
   [
@@ -1020,4 +1020,4 @@ export const faqs = [
     "How do I apply for a role?",
     "Select a company pin or directory card, then choose “Visit careers page”. You’ll apply directly through the company’s official website; we don’t collect applications.",
   ],
-] as const
+] as const;
