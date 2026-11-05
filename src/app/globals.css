@@ -460,9 +460,6 @@ kbd {
 .site-header.is-scrolled {
   border-bottom-color: var(--line-strong);
 }
-.site-header.is-slim .header-inner {
-  height: 54px;
-}
 
 /* ============ Hero ============ */
 .home-page {
@@ -1610,6 +1607,130 @@ kbd {
   color: var(--faint);
   flex-shrink: 0;
 }
+
+/* ============ Custom select ============ */
+/* Replaces the native <select> on the map page: the OS renders a native
+   option list with its own blue highlight, which CSS cannot restyle. */
+.custom-select {
+  position: relative;
+}
+.select-trigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--field);
+  padding: 9px 12px;
+  color: var(--muted);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+.select-trigger:hover {
+  border-color: var(--line-strong);
+}
+.select-trigger:focus-visible {
+  outline: 2px solid var(--line-strong);
+  outline-offset: 1px;
+  border-color: var(--faint);
+}
+.select-trigger.is-open {
+  border-color: var(--faint);
+}
+.select-value {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+  color: var(--text);
+}
+.select-hint {
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--faint);
+  flex-shrink: 0;
+}
+.select-chevron {
+  color: var(--faint);
+  flex-shrink: 0;
+  transition: rotate 0.25s var(--ease);
+}
+.select-trigger.is-open .select-chevron {
+  rotate: 180deg;
+}
+.select-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 800;
+  max-height: 264px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  box-shadow: var(--shadow);
+  padding: 4px;
+  animation: menu-in 0.18s var(--ease) both;
+}
+.select-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 9px 10px;
+  border-radius: 7px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--muted);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background-color 0.15s,
+    color 0.15s;
+}
+.select-option.is-active {
+  background: var(--surface-2);
+  color: var(--text);
+}
+.select-option.is-selected {
+  color: var(--text);
+}
+.select-option-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.select-option-hint {
+  font-size: 11.5px;
+  color: var(--faint);
+  flex-shrink: 0;
+}
+.select-option-check {
+  color: var(--text);
+  flex-shrink: 0;
+}
+@keyframes menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
 .search-field {
   display: flex;
   align-items: center;
@@ -1886,19 +2007,86 @@ kbd {
   flex: 1;
   min-height: 0;
   display: flex;
+  position: relative;
 }
 .explorer-sidebar {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
   width: 348px;
-  flex-shrink: 0;
   display: flex;
   flex-direction: column;
   min-height: 0;
+  overflow: hidden;
   background: var(--surface);
   border-right: 1px solid var(--line);
-  z-index: 2;
+  z-index: 700;
+  transition:
+    transform 0.38s var(--ease),
+    visibility 0s;
+}
+/* The collapsed state only exists when JS runs (the toggle is a React
+   control), so the hidden state is scoped under html.js: without JS the
+   sidebar is always visible. */
+html.js .explorer.sidebar-collapsed .explorer-sidebar {
+  transform: translateX(-105%);
+  visibility: hidden;
+  transition:
+    transform 0.38s var(--ease),
+    visibility 0s 0.38s;
+}
+.explorer-brand {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 20px 0;
+  flex-shrink: 0;
+}
+.sidebar-toggle {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translate(348px, -50%);
+  z-index: 700;
+  width: 26px;
+  height: 54px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-left: 0;
+  border-radius: 0 9px 9px 0;
+  color: var(--muted);
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  transition:
+    transform 0.38s var(--ease),
+    background-color 0.2s,
+    color 0.2s;
+}
+.sidebar-toggle:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+.sidebar-toggle:focus-visible {
+  outline: 2px solid var(--line-strong);
+  outline-offset: 1px;
+}
+.sidebar-toggle-icon {
+  transition: rotate 0.38s var(--ease);
+  rotate: 180deg;
+}
+.explorer.sidebar-collapsed .sidebar-toggle {
+  transform: translate(0, -50%);
+}
+.explorer.sidebar-collapsed .sidebar-toggle-icon {
+  rotate: 0deg;
 }
 .explorer-top {
-  padding: 22px 20px 16px;
+  padding: 14px 20px 16px;
   border-bottom: 1px solid var(--line);
 }
 .explorer-intro h1 {
@@ -1920,10 +2108,6 @@ kbd {
   margin-top: 16px;
   position: relative;
 }
-.explorer-controls .city-field select {
-  max-width: none;
-  width: 100%;
-}
 .explorer-controls .city-field {
   width: 100%;
 }
@@ -1931,13 +2115,10 @@ kbd {
   display: flex;
   gap: 8px;
 }
-.filter-line .select-field {
+.filter-line .select-field,
+.filter-line .custom-select {
   flex: 1;
   min-width: 0;
-}
-.filter-line .select-field select {
-  width: 100%;
-  max-width: none;
 }
 .filter-button {
   position: relative;
@@ -1972,6 +2153,7 @@ kbd {
   padding: 18px;
   display: grid;
   gap: 16px;
+  animation: menu-in 0.22s var(--ease) both;
 }
 .filter-panel-head {
   display: flex;
@@ -2158,12 +2340,21 @@ kbd {
   box-shadow: var(--shadow-sm);
   pointer-events: none;
 }
+/* The drawer covers the map's left edge — recenter the hint on the
+   visible part of the map. */
+.explorer:not(.sidebar-collapsed) .map-hint {
+  left: calc(50% + 174px);
+}
 .expanded-list {
   position: absolute;
   inset: 0;
   overflow-y: auto;
   padding: 32px;
   background: var(--bg);
+  transition: padding-left 0.38s var(--ease);
+}
+.explorer:not(.sidebar-collapsed) .expanded-list {
+  padding-left: 380px;
 }
 .expanded-list-head {
   display: flex;
@@ -3208,6 +3399,9 @@ html.js [data-reveal].is-in {
   .explorer-sidebar {
     width: 320px;
   }
+  .sidebar-toggle {
+    transform: translate(320px, -50%);
+  }
 }
 @media (max-width: 860px) {
   .primary-nav {
@@ -3385,9 +3579,26 @@ html.js [data-reveal].is-in {
     flex-direction: column;
   }
   .explorer-sidebar {
+    position: static;
     width: 100%;
+    transform: none;
+    visibility: visible;
     border-right: 0;
     border-bottom: 1px solid var(--line);
+  }
+  /* The sidebar stacks above the map on mobile — never collapse it there. */
+  .explorer.sidebar-collapsed .explorer-sidebar {
+    position: static;
+    width: 100%;
+    transform: none;
+    visibility: visible;
+    border-bottom: 1px solid var(--line);
+  }
+  .explorer:not(.sidebar-collapsed) .expanded-list {
+    padding-left: 16px;
+  }
+  .sidebar-toggle {
+    display: none;
   }
   .explorer-results {
     display: none;

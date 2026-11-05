@@ -3,22 +3,26 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
+import { Brand } from "@/components/Brand";
 import { CompanyLogo } from "@/components/CompanyLogo";
 import { DirectoryCard } from "@/components/DirectoryCard";
 import {
   ArrowRight,
   ArrowUpRight,
   Check,
-  ChevronDown,
+  ChevronRight,
   Close,
   GridIcon,
   ListIcon,
   MapIcon,
+  Moon,
   Pin,
   Search,
   Sliders,
+  Sun,
 } from "@/components/icons";
 import { MapCanvas } from "@/components/MapCanvas";
+import { Select } from "@/components/Select";
 import { useSelectCompany } from "@/components/Shell";
 import { useThemeContext } from "@/components/theme";
 import { type Company, cities, companies } from "@/data/companies";
@@ -34,8 +38,9 @@ function countIn(list: Company[], area: string) {
 
 export function MapContent() {
   const searchParams = useSearchParams();
-  const { theme } = useThemeContext();
+  const { theme, toggle } = useThemeContext();
   const onSelect = useSelectCompany();
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [cityId, setCityId] = useState(
     () =>
       cityFromParam(searchParams.get("city")) ?? getLastCity() ?? "bengaluru",
@@ -65,7 +70,16 @@ export function MapContent() {
 
   useEffect(() => {
     setLastCity(cityId);
-    const next = `/map?city=${cityId}`;
+    // Keep the rest of the query (a ?company= deep link) intact; drop it
+    // only when the linked company doesn't belong to the new city.
+    const params = new URLSearchParams(window.location.search);
+    params.set("city", cityId);
+    const linkedId = params.get("company");
+    if (linkedId) {
+      const linked = companies.find((item) => item.id === linkedId);
+      if (!linked || linked.city !== cityId) params.delete("company");
+    }
+    const next = `/map?${params.toString()}`;
     if (window.location.pathname + window.location.search !== next) {
       window.history.replaceState(null, "", next);
     }
@@ -130,15 +144,70 @@ export function MapContent() {
     setSearch("");
   };
 
+  const cityOptions = useMemo(
+    () =>
+      cities.map((item) => ({
+        value: item.id,
+        label: item.name,
+        hint: `${companies.filter((company) => company.city === item.id).length}`,
+      })),
+    [],
+  );
+
+  const areaOptions = useMemo(
+    () => [
+      {
+        value: "All areas",
+        label: "All areas",
+        hint: `${allCityCompanies.length}`,
+      },
+      ...city.areas.map((item) => ({
+        value: item,
+        label: item,
+        hint: `${countIn(allCityCompanies, item)}`,
+      })),
+    ],
+    [allCityCompanies, city.areas],
+  );
+
+  // Picking a company on the map keeps the URL in sync, so the open panel
+  // survives a refresh and the link stays shareable.
+  const selectOnMap = (company: Company) => {
+    onSelect(company);
+    const params = new URLSearchParams(window.location.search);
+    params.set("company", company.id);
+    window.history.replaceState(null, "", `/map?${params.toString()}`);
+  };
+
   const chooseCity = (id: string) => setCityId(id);
 
   return (
-    <div className={`explorer view-${view}`} suppressHydrationWarning>
+    <div
+      className={`explorer view-${view}${sidebarOpen ? "" : " sidebar-collapsed"}`}
+      suppressHydrationWarning
+    >
       {/* City is client-only state (URL query / localStorage); the static prerender uses the default. Suppress the expected mismatch — the client value wins. */}
       <aside
         className="explorer-sidebar"
         aria-label="Company filters and results"
       >
+        <div className="explorer-brand">
+          <Brand small />
+          <button
+            type="button"
+            className="icon-button theme-button"
+            onClick={toggle}
+            aria-label={
+              theme === "dark"
+                ? "Switch to light theme"
+                : "Switch to dark theme"
+            }
+            title={theme === "dark" ? "Light theme" : "Dark theme"}
+          >
+            {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
+          </button>
+        </div>
+
         <div className="explorer-top">
           <div className="explorer-intro">
             <p className="kicker">
@@ -154,21 +223,14 @@ export function MapContent() {
           </div>
 
           <div className="explorer-controls">
-            <label className="select-field city-field">
-              <span className="sr-only">City</span>
-              <MapIcon size={15} />
-              <select
-                value={city.id}
-                onChange={(event) => chooseCity(event.target.value)}
-              >
-                {cities.map((item) => (
-                  <option value={item.id} key={item.id}>
-                    {item.name}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown size={14} />
-            </label>
+            <Select
+              value={city.id}
+              options={cityOptions}
+              onChange={chooseCity}
+              label="City"
+              icon={<MapIcon size={15} />}
+              className="city-field"
+            />
 
             <label className="search-field">
               <span className="sr-only">
@@ -205,21 +267,13 @@ export function MapContent() {
             </label>
 
             <div className="filter-line">
-              <label className="select-field">
-                <span className="sr-only">Neighbourhood</span>
-                <select
-                  value={area}
-                  onChange={(event) => setArea(event.target.value)}
-                >
-                  <option>All areas</option>
-                  {city.areas.map((item) => (
-                    <option key={item} value={item}>
-                      {item} ({countIn(allCityCompanies, item)})
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown size={14} />
-              </label>
+              <Select
+                value={area}
+                options={areaOptions}
+                onChange={setArea}
+                label="Neighbourhood"
+                className="area-field"
+              />
               <button
                 ref={filtersButton}
                 type="button"
@@ -350,7 +404,7 @@ export function MapContent() {
               type="button"
               key={company.id}
               className="result-row"
-              onClick={() => onSelect(company)}
+              onClick={() => selectOnMap(company)}
               aria-label={`View ${company.name}, ${company.area}, ${company.category}`}
             >
               <CompanyLogo company={company} />
@@ -388,6 +442,17 @@ export function MapContent() {
         </div>
       </aside>
 
+      <button
+        type="button"
+        className="sidebar-toggle"
+        onClick={() => setSidebarOpen((open) => !open)}
+        aria-expanded={sidebarOpen}
+        aria-label={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
+        title={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
+      >
+        <ChevronRight size={16} className="sidebar-toggle-icon" />
+      </button>
+
       <div className="explorer-map">
         {view === "map" ? (
           <>
@@ -395,7 +460,8 @@ export function MapContent() {
               city={city}
               companies={filtered}
               dark={theme === "dark"}
-              onSelect={onSelect}
+              onSelect={selectOnMap}
+              sidebarOpen={sidebarOpen}
             />
             <div className="map-hint">
               <GridIcon size={13} /> Select a pin to meet the company
@@ -422,7 +488,7 @@ export function MapContent() {
                   <DirectoryCard
                     key={company.id}
                     company={company}
-                    onSelect={onSelect}
+                    onSelect={selectOnMap}
                   />
                 ))}
               </div>

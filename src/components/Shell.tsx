@@ -26,7 +26,7 @@ import { ArrowRight } from "@/components/icons";
 import { MobileNav } from "@/components/MobileNav";
 import { Reveal } from "@/components/Reveal";
 import { type Theme, ThemeContext } from "@/components/theme";
-import type { Company } from "@/data/companies";
+import { type Company, companies } from "@/data/companies";
 import { useScrolled, useTheme } from "@/lib/hooks";
 
 const CompanyPanel = dynamic(
@@ -63,9 +63,21 @@ export function Shell({
   const [menuOpen, setMenuOpen] = useState(false);
   const [selected, setSelected] = useState<Company | null>(null);
   const mainRef = useRef<HTMLElement>(null);
-  // biome-ignore lint/correctness/useExhaustiveDependencies: pathname is the intentional reset trigger.
   useEffect(() => {
     setMenuOpen(false);
+    // A ?company= deep link (home preview pin, shared URL) hands the map
+    // page its selection instead of starting with a closed panel.
+    if (pathname === "/map") {
+      const companyId = new URLSearchParams(window.location.search).get(
+        "company",
+      );
+      setSelected(
+        companyId
+          ? (companies.find((item) => item.id === companyId) ?? null)
+          : null,
+      );
+      return;
+    }
     setSelected(null);
   }, [pathname]);
 
@@ -73,6 +85,20 @@ export function Shell({
     (company: Company) => setSelected(company),
     [],
   );
+
+  const closePanel = useCallback(() => {
+    setSelected(null);
+    // Drop the deep-link param so a refresh doesn't resurrect the panel
+    // after the user deliberately closed it.
+    if (pathname === "/map") {
+      const params = new URLSearchParams(window.location.search);
+      if (params.has("company")) {
+        params.delete("company");
+        const query = params.toString();
+        window.history.replaceState(null, "", query ? `/map?${query}` : "/map");
+      }
+    }
+  }, [pathname]);
 
   return (
     <ThemeContext.Provider value={{ theme: theme as Theme, toggle }}>
@@ -104,14 +130,18 @@ export function Shell({
             </div>
           )}
 
-          <Header
-            page={page}
-            theme={theme}
-            scrolled={scrolled}
-            onToggleTheme={toggle}
-            onOpenMenu={() => setMenuOpen(true)}
-            slim={isMap}
-          />
+          {/* The map page is a full-screen workspace — no navbar, no
+              announcement, no footer. Its sidebar carries the brand and
+              the theme switch instead. */}
+          {!isMap && (
+            <Header
+              page={page}
+              theme={theme}
+              scrolled={scrolled}
+              onToggleTheme={toggle}
+              onOpenMenu={() => setMenuOpen(true)}
+            />
+          )}
 
           <main
             id="main"
@@ -125,20 +155,17 @@ export function Shell({
 
           {!isMap && <Footer />}
 
-          <MobileNav
-            open={menuOpen}
-            page={page}
-            theme={theme}
-            onClose={() => setMenuOpen(false)}
-            onToggleTheme={toggle}
-          />
-
-          {selected && (
-            <CompanyPanel
-              company={selected}
-              onClose={() => setSelected(null)}
+          {!isMap && (
+            <MobileNav
+              open={menuOpen}
+              page={page}
+              theme={theme}
+              onClose={() => setMenuOpen(false)}
+              onToggleTheme={toggle}
             />
           )}
+
+          {selected && <CompanyPanel company={selected} onClose={closePanel} />}
 
           <Reveal />
         </div>

@@ -18,6 +18,7 @@ type Props = {
   selected?: Company | null;
   onSelect: (company: Company) => void;
   preview?: boolean;
+  sidebarOpen?: boolean;
 };
 
 export function MapCanvas(props: Props) {

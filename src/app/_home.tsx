@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { CitySection } from "@/components/CitySection";
 import { CompanyLogo } from "@/components/CompanyLogo";
@@ -9,15 +10,14 @@ import { ArrowRight, ArrowUpRight, Compass, Pin } from "@/components/icons";
 import { LazySection } from "@/components/LazySection";
 import { MapCanvas } from "@/components/MapCanvas";
 import { Pricing } from "@/components/Pricing";
-import { useSelectCompany } from "@/components/Shell";
 import { useThemeContext } from "@/components/theme";
-import { cities, companies } from "@/data/companies";
+import { type Company, cities, companies } from "@/data/companies";
 import { getLastCity, setLastCity } from "@/lib/city";
 import { plural } from "@/lib/utils";
 
 export function HomeContent() {
   const { theme } = useThemeContext();
-  const onSelect = useSelectCompany();
+  const router = useRouter();
   const [cityId, setCityId] = useState(() => getLastCity() ?? "bengaluru");
   const city = cities.find((item) => item.id === cityId) ?? cities[0];
   const cityCompanies = useMemo(
@@ -35,6 +35,12 @@ export function HomeContent() {
   const chooseCity = (id: string) => {
     setCityId(id);
     setLastCity(id);
+  };
+
+  // The home preview never opens the company panel — a pin or a company
+  // row takes you to the full map, which deep-links the company there.
+  const goToCompany = (company: Company) => {
+    router.push(`/map?city=${city.id}&company=${company.id}`);
   };
 
   return (
@@ -87,7 +93,7 @@ export function HomeContent() {
             city={city}
             companies={cityCompanies}
             dark={theme === "dark"}
-            onSelect={onSelect}
+            onSelect={goToCompany}
             preview
           />
         </div>
@@ -145,7 +151,7 @@ export function HomeContent() {
                 key={company.id}
                 type="button"
                 className="company-row"
-                onClick={() => onSelect(company)}
+                onClick={() => goToCompany(company)}
                 data-reveal
               >
                 <CompanyLogo company={company} />

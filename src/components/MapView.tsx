@@ -39,6 +39,7 @@ type Props = {
   selected?: Company | null;
   onSelect: (company: Company) => void;
   preview?: boolean;
+  sidebarOpen?: boolean;
 };
 
 function tileSource(provider: Provider, dark: boolean) {
@@ -80,6 +81,7 @@ export default function MapView({
   selected,
   onSelect,
   preview = false,
+  sidebarOpen = true,
 }: Props) {
   const container = useRef<HTMLDivElement>(null);
   const map = useRef<L.Map | null>(null);
@@ -90,6 +92,9 @@ export default function MapView({
   const selectedRef = useRef(selected);
   callback.current = onSelect;
   selectedRef.current = selected;
+  // The sidebar is a drawer over the map's left edge: leave room for it
+  // when fitting pins (desktop only — on mobile it stacks above the map).
+  const padLeft = drawerPadLeft(preview, sidebarOpen);
 
   const online = useOnline();
   const slow = useSlowConnection();
@@ -133,7 +138,7 @@ export default function MapView({
 
     const frame = window.requestAnimationFrame(() => {
       instance.invalidateSize();
-      fitToCompanies(instance, city, companies, false);
+      fitToCompanies(instance, city, companies, false, padLeft);
       lastCity.current = city.id;
       const indiaZoom = instance.getBoundsZoom(INDIA_BOUNDS, true);
       instance.setMinZoom(Math.max(4, Math.min(indiaZoom + 1, 6)));
@@ -253,7 +258,13 @@ export default function MapView({
     if (!instance) return;
     const fit = () => {
       instance.invalidateSize();
-      fitToCompanies(instance, city, companies, lastCity.current !== city.id);
+      fitToCompanies(
+        instance,
+        city,
+        companies,
+        lastCity.current !== city.id,
+        padLeft,
+      );
       lastCity.current = city.id;
     };
     const frame = window.requestAnimationFrame(fit);
@@ -429,7 +440,8 @@ export default function MapView({
   };
 
   const fitResults = () => {
-    if (map.current) fitToCompanies(map.current, city, companies, true);
+    if (map.current)
+      fitToCompanies(map.current, city, companies, true, padLeft);
   };
 
   const ready = status === "ready";
@@ -541,11 +553,18 @@ export default function MapView({
   );
 }
 
+function drawerPadLeft(preview: boolean, sidebarOpen?: boolean) {
+  if (preview || !sidebarOpen) return 12;
+  if (typeof window !== "undefined" && window.innerWidth <= 640) return 12;
+  return 360;
+}
+
 function fitToCompanies(
   instance: L.Map,
   city: City,
   companies: Company[],
   animate: boolean,
+  padLeft = 12,
 ) {
   if (companies.length === 0) {
     instance.flyTo([city.lat, city.lng], 12, { duration: animate ? 0.6 : 0 });
@@ -563,7 +582,7 @@ function fitToCompanies(
   instance.flyToBounds(bounds, {
     maxZoom: 13,
     duration: animate ? 0.65 : 0,
-    paddingTopLeft: [12, 36],
+    paddingTopLeft: [padLeft, 36],
     paddingBottomRight: [12, 36],
   });
 }

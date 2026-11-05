@@ -17,22 +17,16 @@ export function Header({
   scrolled,
   onToggleTheme,
   onOpenMenu,
-  slim = false,
 }: {
   page: string;
   theme: "dark" | "light";
   scrolled: boolean;
   onToggleTheme: () => void;
   onOpenMenu: () => void;
-  slim?: boolean;
 }) {
   const activePage = page;
   return (
-    <header
-      className={`site-header${scrolled ? " is-scrolled" : ""}${
-        slim ? " is-slim" : ""
-      }`}
-    >
+    <header className={`site-header${scrolled ? " is-scrolled" : ""}`}>
       <div className="header-inner">
         <Brand />
         <nav className="primary-nav" aria-label="Primary">
